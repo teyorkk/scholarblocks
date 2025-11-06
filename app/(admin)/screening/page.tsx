@@ -13,7 +13,6 @@ import {
   XCircle, 
   Clock, 
   Eye,
-  Filter,
   Download
 } from "lucide-react"
 import { mockApplicants } from "@/lib/mock-data"

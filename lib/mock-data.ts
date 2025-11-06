@@ -1,5 +1,3 @@
-import { ApplicationFormData } from './validations'
-
 export const mockUser = {
   id: '1',
   name: 'Juan Dela Cruz',

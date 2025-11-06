@@ -20,6 +20,8 @@ import {
 } from "lucide-react"
 import { mockApplications } from "@/lib/mock-data"
 
+type Application = typeof mockApplications[number]
+
 const statusColors = {
   Approved: 'bg-green-100 text-green-700',
   Pending: 'bg-orange-100 text-orange-700',
@@ -33,10 +35,10 @@ const statusIcons = {
 }
 
 export default function HistoryPage() {
-  const [selectedApplication, setSelectedApplication] = useState<any>(null)
+  const [selectedApplication, setSelectedApplication] = useState<Application | null>(null)
   const [filter, setFilter] = useState<string>('all')
 
-  const filteredApplications = mockApplications.filter((app: any) => 
+  const filteredApplications = mockApplications.filter((app: Application) => 
     filter === 'all' || app.status === filter
   )
 
@@ -141,21 +143,21 @@ export default function HistoryPage() {
                     size="sm"
                     onClick={() => setFilter('Pending')}
                   >
-                    Pending ({mockApplications.filter((app: any) => app.status === 'Pending').length})
+                    Pending ({mockApplications.filter((app: Application) => app.status === 'Pending').length})
                   </Button>
                   <Button
                     variant={filter === 'Approved' ? 'default' : 'outline'}
                     size="sm"
                     onClick={() => setFilter('Approved')}
                   >
-                    Approved ({mockApplications.filter((app: any) => app.status === 'Approved').length})
+                    Approved ({mockApplications.filter((app: Application) => app.status === 'Approved').length})
                   </Button>
                   <Button
                     variant={filter === 'Rejected' ? 'default' : 'outline'}
                     size="sm"
                     onClick={() => setFilter('Rejected')}
                   >
-                    Rejected ({mockApplications.filter((app: any) => app.status === 'Rejected').length})
+                    Rejected ({mockApplications.filter((app: Application) => app.status === 'Rejected').length})
                   </Button>
                 </div>
               </CardContent>
@@ -183,7 +185,7 @@ export default function HistoryPage() {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {filteredApplications.map((application: any, index: number) => (
+                      {filteredApplications.map((application: Application, index: number) => (
                         <motion.tr
                           key={index}
                           initial={{ opacity: 0, y: 10 }}

@@ -2,7 +2,6 @@
 
 import { motion } from "framer-motion"
 import { useState } from "react"
-import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { Shield, Eye, EyeOff, ArrowLeft, Lock, CheckCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -19,7 +18,6 @@ export default function ResetPasswordPage() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [isSuccess, setIsSuccess] = useState(false)
-  const router = useRouter()
 
   const {
     register,
@@ -29,7 +27,7 @@ export default function ResetPasswordPage() {
     resolver: zodResolver(resetPasswordSchema),
   })
 
-  const onSubmit = async (data: ResetPasswordFormData) => {
+  const onSubmit = async () => {
     setIsLoading(true)
     
     // Simulate API call

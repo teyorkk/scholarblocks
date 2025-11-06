@@ -11,7 +11,6 @@ import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Progress } from "@/components/ui/progress"
-import { Badge } from "@/components/ui/badge"
 import { 
   Upload, 
   Camera, 
@@ -20,7 +19,6 @@ import {
   ArrowRight, 
   ArrowLeft, 
   CheckCircle,
-  AlertCircle,
   Zap
 } from "lucide-react"
 import { useForm } from "react-hook-form"
@@ -68,7 +66,7 @@ export default function ApplicationPage() {
     maxFiles: 1,
   })
 
-  const onSubmit = (data: ApplicationFormData) => {
+  const onSubmit = () => {
     setIsSubmitted(true)
     toast.success('Application submitted successfully!')
   }

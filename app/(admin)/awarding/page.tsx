@@ -19,11 +19,13 @@ import {
 } from "lucide-react"
 import { mockEligibleScholars } from "@/lib/mock-data"
 
+type Scholar = typeof mockEligibleScholars[number]
+
 export default function AwardingPage() {
-  const [selectedScholar, setSelectedScholar] = useState<any>(null)
+  const [selectedScholar, setSelectedScholar] = useState<Scholar | null>(null)
   const [isAwarding, setIsAwarding] = useState(false)
 
-  const handleAwardScholarship = (scholarId: string) => {
+  const handleAwardScholarship = () => {
     setIsAwarding(true)
     setTimeout(() => {
       setIsAwarding(false)
@@ -243,7 +245,7 @@ export default function AwardingPage() {
                                   variant="ghost" 
                                   size="sm" 
                                   className="text-green-600"
-                                  onClick={() => handleAwardScholarship(scholar.id)}
+                                  onClick={handleAwardScholarship}
                                   disabled={isAwarding}
                                 >
                                   <CheckCircle className="w-4 h-4" />

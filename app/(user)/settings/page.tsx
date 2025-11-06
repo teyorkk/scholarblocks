@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { 
@@ -47,7 +47,6 @@ export default function SettingsPage() {
   const [isEditing, setIsEditing] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
   const [showPasswordDialog, setShowPasswordDialog] = useState(false)
-  const [profileImage, setProfileImage] = useState<File | null>(null)
 
   const {
     register: registerProfile,
@@ -71,7 +70,7 @@ export default function SettingsPage() {
     reset: resetPassword,
   } = useForm<PasswordFormData>()
 
-  const onProfileSubmit = async (data: ProfileFormData) => {
+  const onProfileSubmit = async () => {
     setIsSaving(true)
     
     // Simulate API call
@@ -99,7 +98,6 @@ export default function SettingsPage() {
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
     if (file) {
-      setProfileImage(file)
       toast.success('Profile image updated!')
     }
   }

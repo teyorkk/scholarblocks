@@ -2,7 +2,6 @@
 
 import { motion } from "framer-motion"
 import { useState } from "react"
-import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { Shield, ArrowLeft, Mail, ArrowRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -17,7 +16,6 @@ import { toast } from "sonner"
 export default function ForgotPasswordPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [isSubmitted, setIsSubmitted] = useState(false)
-  const router = useRouter()
 
   const {
     register,
@@ -27,7 +25,7 @@ export default function ForgotPasswordPage() {
     resolver: zodResolver(forgotPasswordSchema),
   })
 
-  const onSubmit = async (data: ForgotPasswordFormData) => {
+  const onSubmit = async () => {
     setIsLoading(true)
     
     // Simulate API call
@@ -58,7 +56,7 @@ export default function ForgotPasswordPage() {
                 Check Your Email
               </CardTitle>
               <CardDescription className="text-gray-600">
-                We've sent password reset instructions to your email
+                We&apos;ve sent password reset instructions to your email
               </CardDescription>
             </CardHeader>
             
@@ -66,7 +64,7 @@ export default function ForgotPasswordPage() {
               <div className="p-4 bg-gray-50 rounded-lg">
                 <p className="text-sm text-gray-600">
                   Please check your inbox and follow the instructions to reset your password. 
-                  If you don't receive an email within a few minutes, check your spam folder.
+                  If you don&apos;t receive an email within a few minutes, check your spam folder.
                 </p>
               </div>
 
@@ -131,7 +129,7 @@ export default function ForgotPasswordPage() {
               Forgot Password?
             </CardTitle>
             <CardDescription className="text-gray-600">
-              Enter your email address and we'll send you instructions to reset your password
+              Enter your email address and we&apos;ll send you instructions to reset your password
             </CardDescription>
           </CardHeader>
           

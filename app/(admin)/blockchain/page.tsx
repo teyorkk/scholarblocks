@@ -19,9 +19,11 @@ import {
 } from "lucide-react"
 import { mockBlockchainRecords } from "@/lib/mock-data"
 
+type BlockchainRecord = typeof mockBlockchainRecords[number]
+
 export default function BlockchainPage() {
   const [searchTerm, setSearchTerm] = useState("")
-  const [selectedRecord, setSelectedRecord] = useState<any>(null)
+  const [selectedRecord, setSelectedRecord] = useState<BlockchainRecord | null>(null)
 
   const filteredRecords = mockBlockchainRecords.filter(record =>
     record.applicantName.toLowerCase().includes(searchTerm.toLowerCase()) ||

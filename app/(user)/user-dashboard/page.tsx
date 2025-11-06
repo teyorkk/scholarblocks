@@ -1,7 +1,6 @@
 'use client'
 
 import { motion } from "framer-motion"
-import { useEffect } from "react"
 import { UserSidebar } from "@/components/user-sidebar"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
