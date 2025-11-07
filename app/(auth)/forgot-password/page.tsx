@@ -1,26 +1,34 @@
-'use client'
+"use client";
 
-import { motion } from "framer-motion"
-import { useState } from "react"
-import Link from "next/link"
-import { Shield, ArrowLeft, Mail, ArrowRight } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { OTPVerification } from "@/components/ui/otp-verification"
-import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { forgotPasswordSchema, type ForgotPasswordFormData } from "@/lib/validations"
-import { toast } from "sonner"
+import { motion } from "framer-motion";
+import { useState } from "react";
+import Link from "next/link";
+import { Shield, ArrowLeft, Mail, ArrowRight } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { OTPVerification } from "@/components/ui/otp-verification";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import {
+  forgotPasswordSchema,
+  type ForgotPasswordFormData,
+} from "@/lib/validations";
+import { toast } from "sonner";
 
 export default function ForgotPasswordPage() {
-  const [isLoading, setIsLoading] = useState(false)
-  const [isSubmitted, setIsSubmitted] = useState(false)
-  const [showOTPModal, setShowOTPModal] = useState(false)
-  const [isVerifyingOTP, setIsVerifyingOTP] = useState(false)
-  const [generatedOTP, setGeneratedOTP] = useState('')
-  const [userEmail, setUserEmail] = useState('')
+  const [isLoading, setIsLoading] = useState(false);
+  const [isSubmitted, setIsSubmitted] = useState(false);
+  const [showOTPModal, setShowOTPModal] = useState(false);
+  const [isVerifyingOTP, setIsVerifyingOTP] = useState(false);
+  const [userEmail, setUserEmail] = useState("");
 
   const {
     register,
@@ -28,63 +36,78 @@ export default function ForgotPasswordPage() {
     formState: { errors },
   } = useForm<ForgotPasswordFormData>({
     resolver: zodResolver(forgotPasswordSchema),
-  })
+  });
 
   const onSubmit = async (data: ForgotPasswordFormData) => {
-    setIsLoading(true)
-    setUserEmail(data.email)
-    
-    // Check if user exists
-    const existingUsers = [
-      'juan@example.com',
-      'admin@scholarblock.com',
-      'user@example.com'
-    ]
-    
-    if (!existingUsers.includes(data.email.toLowerCase())) {
-      toast.error('User does not exist. Please check your email address.')
-      setIsLoading(false)
-      return
+    try {
+      setIsLoading(true);
+      setUserEmail(data.email);
+      const res = await fetch("/api/auth/forgot-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: data.email }),
+      });
+      const json = await res.json();
+      if (!res.ok) {
+        toast.error(json.error || "Failed to send code");
+        setIsLoading(false);
+        return;
+      }
+      setShowOTPModal(true);
+      toast.info("Check your email for a verification code.");
+    } catch (e) {
+      const error = e as Error;
+      toast.error(error.message || "Unexpected error");
+    } finally {
+      setIsLoading(false);
     }
-    
-    // Generate 8-digit OTP
-    const otp = Math.floor(10000000 + Math.random() * 90000000).toString()
-    setGeneratedOTP(otp)
-    
-    // Show OTP modal instead of directly sending reset instructions
-    setTimeout(() => {
-      setIsLoading(false)
-      setShowOTPModal(true)
-      toast.info(`OTP sent to ${data.email}: ${otp} (for demo purposes)`)
-    }, 1000)
-  }
+  };
 
   const handleOTPVerify = async (otp: string) => {
-    setIsVerifyingOTP(true)
-    
-    // Simulate OTP verification
-    setTimeout(() => {
-      if (otp === generatedOTP) {
-        // OTP is correct, proceed with password reset
-        setShowOTPModal(false)
-        setIsSubmitted(true)
-        toast.success('Email verified! You can now reset your password.')
-      } else {
-        toast.error('Invalid OTP. Please try again.')
+    try {
+      setIsVerifyingOTP(true);
+      const res = await fetch("/api/auth/verify-otp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: userEmail,
+          code: otp,
+          context: "forgot",
+        }),
+      });
+      const json = await res.json();
+      if (!res.ok) {
+        toast.error(json.error || "Verification failed");
+        return;
       }
-      setIsVerifyingOTP(false)
-    }, 1500)
-  }
+      setShowOTPModal(false);
+      setIsSubmitted(true);
+      toast.success("Email verified! You can now reset your password.");
+    } catch (e) {
+      const error = e as Error;
+      toast.error(error.message || "Unexpected error");
+    } finally {
+      setIsVerifyingOTP(false);
+    }
+  };
 
-  const handleResendOTP = () => {
-    const otp = Math.floor(10000000 + Math.random() * 90000000).toString()
-    setGeneratedOTP(otp)
-    toast.info(`New OTP sent to ${userEmail}: ${otp} (for demo purposes)`)
-  }
+  const handleResendOTP = async () => {
+    const res = await fetch("/api/auth/forgot-password", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email: userEmail }),
+    });
+    const json = await res.json();
+    if (!res.ok) {
+      toast.error(json.error || "Failed to resend code");
+      return;
+    }
+    toast.info("Verification code resent.");
+  };
 
   if (isSubmitted) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-orange-50 to-white flex items-center justify-center p-4">
+      <div className="min-h-screen bg-linear-to-br from-orange-50 to-white flex items-center justify-center p-4">
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -105,12 +128,13 @@ export default function ForgotPasswordPage() {
                 We&apos;ve sent password reset instructions to your email
               </CardDescription>
             </CardHeader>
-            
+
             <CardContent className="text-center space-y-4">
               <div className="p-4 bg-gray-50 rounded-lg">
                 <p className="text-sm text-gray-600">
-                  Please check your inbox and follow the instructions to reset your password. 
-                  If you don&apos;t receive an email within a few minutes, check your spam folder.
+                  Please check your inbox and follow the instructions to reset
+                  your password. If you don&apos;t receive an email within a few
+                  minutes, check your spam folder.
                 </p>
               </div>
 
@@ -121,7 +145,7 @@ export default function ForgotPasswordPage() {
                     <ArrowRight className="ml-2 w-4 h-4" />
                   </Button>
                 </Link>
-                
+
                 <Button
                   variant="outline"
                   className="w-full"
@@ -153,11 +177,11 @@ export default function ForgotPasswordPage() {
           </div>
         </motion.div>
       </div>
-    )
+    );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 to-white flex items-center justify-center p-4">
+    <div className="min-h-screen bg-linear-to-br from-orange-50 to-white flex items-center justify-center p-4">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -175,10 +199,11 @@ export default function ForgotPasswordPage() {
               Forgot Password?
             </CardTitle>
             <CardDescription className="text-gray-600">
-              Enter your email address and we&apos;ll send you instructions to reset your password
+              Enter your email address and we&apos;ll send you instructions to
+              reset your password
             </CardDescription>
           </CardHeader>
-          
+
           <CardContent>
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
               <div className="space-y-2">
@@ -206,11 +231,15 @@ export default function ForgotPasswordPage() {
                 {isLoading ? (
                   <motion.div
                     animate={{ rotate: 360 }}
-                    transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                    transition={{
+                      duration: 1,
+                      repeat: Infinity,
+                      ease: "linear",
+                    }}
                     className="w-5 h-5 border-2 border-white border-t-transparent rounded-full"
                   />
                 ) : (
-                  "Send Reset Instructions"
+                  "Send Reset OTP"
                 )}
               </Button>
             </form>
@@ -221,7 +250,9 @@ export default function ForgotPasswordPage() {
                   <div className="w-full border-t border-gray-200" />
                 </div>
                 <div className="relative flex justify-center text-sm">
-                  <span className="px-2 bg-white text-gray-500">Remember your password?</span>
+                  <span className="px-2 bg-white text-gray-500">
+                    Remember your password?
+                  </span>
                 </div>
               </div>
 
@@ -255,7 +286,8 @@ export default function ForgotPasswordPage() {
         email={userEmail}
         title="Verify Your Email"
         description="Enter the 8-digit verification code sent to your email address."
+        length={8}
       />
     </div>
-  )
+  );
 }

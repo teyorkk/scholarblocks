@@ -32,52 +32,32 @@ export default function ResetPasswordPage() {
   const password = watch('password', '')
 
   const onSubmit = async (data: ResetPasswordFormData) => {
-    setIsLoading(true)
-    
-    // Check password requirements
-    if (data.password.length < 8) {
-      toast.error('Password must be at least 8 characters long.')
-      setIsLoading(false)
-      return
-    }
-    
-    // Check for strong password requirements
-    const hasUpperCase = /[A-Z]/.test(data.password)
-    const hasLowerCase = /[a-z]/.test(data.password)
-    const hasNumbers = /\d/.test(data.password)
-    const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(data.password)
-    
-    if (!hasUpperCase || !hasLowerCase || !hasNumbers || !hasSpecialChar) {
-      toast.error('Password must include uppercase, lowercase, numbers, and special characters.')
-      setIsLoading(false)
-      return
-    }
-    
-    if (data.password !== data.confirmPassword) {
-      toast.error('Passwords do not match. Please check and try again.')
-      setIsLoading(false)
-      return
-    }
-    
-    // Check if password is too common
-    const commonPasswords = ['password', '123456', 'qwerty', 'abc123']
-    if (commonPasswords.includes(data.password.toLowerCase())) {
-      toast.error('Please choose a stronger password. Avoid common passwords.')
-      setIsLoading(false)
-      return
-    }
-    
-    // Simulate API call
-    setTimeout(() => {
+    try {
+      setIsLoading(true)
+      const res = await fetch('/api/auth/reset-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password: data.password })
+      })
+      const json = await res.json()
+      if (!res.ok) {
+        toast.error(json.error || 'Reset failed')
+        setIsLoading(false)
+        return
+      }
       setIsSuccess(true)
       toast.success('Password reset successful!')
+    } catch (e) {
+      const error = e as Error;
+      toast.error(error.message || 'Unexpected error')
+    } finally {
       setIsLoading(false)
-    }, 1500)
+    }
   }
 
   if (isSuccess) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-orange-50 to-white flex items-center justify-center p-4">
+  <div className="min-h-screen bg-linear-to-br from-orange-50 to-white flex items-center justify-center p-4">
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -142,7 +122,7 @@ export default function ResetPasswordPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 to-white flex items-center justify-center p-4">
+  <div className="min-h-screen bg-linear-to-br from-orange-50 to-white flex items-center justify-center p-4">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}

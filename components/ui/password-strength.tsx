@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from "react"
+import { useMemo } from "react"
 import { Progress } from "@/components/ui/progress"
 import { Check, X, Shield, AlertTriangle } from "lucide-react"
 
@@ -9,12 +9,9 @@ interface PasswordStrengthProps {
 }
 
 export function PasswordStrength({ password }: PasswordStrengthProps) {
-  const [strength, setStrength] = useState(0)
-
-  const checkPasswordStrength = (pass: string) => {
-    if (!pass) {
-      setStrength(0)
-      return
+  const strength = useMemo(() => {
+    if (!password) {
+      return 0
     }
 
     const requirements = [
@@ -25,14 +22,8 @@ export function PasswordStrength({ password }: PasswordStrengthProps) {
       { regex: /[!@#$%^&*(),.?":{}|<>]/, text: "One special character" }
     ]
 
-    const metRequirements = requirements.filter(req => req.regex.test(pass))
-    const strengthPercentage = (metRequirements.length / requirements.length) * 100
-    
-    setStrength(strengthPercentage)
-  }
-
-  useEffect(() => {
-    checkPasswordStrength(password)
+    const metRequirements = requirements.filter(req => req.regex.test(password))
+    return (metRequirements.length / requirements.length) * 100
   }, [password])
 
   const getStrengthText = () => {

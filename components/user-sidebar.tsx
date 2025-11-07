@@ -20,7 +20,8 @@ import {
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { useAuthStore } from "@/lib/store"
+import { useSession } from "./session-provider"
+import { getSupabaseBrowserClient } from "@/lib/supabase/client"
 import { useMobile } from "@/hooks/use-mobile"
 
 const navigation = [
@@ -40,7 +41,7 @@ export function UserSidebar() {
     return false
   })
   const pathname = usePathname()
-  const { user, logout } = useAuthStore()
+  const { user } = useSession()
   const isMobile = useMobile()
 
   // Save collapse state to localStorage
@@ -50,9 +51,15 @@ export function UserSidebar() {
     }
   }, [isCollapsed])
 
-  const handleLogout = () => {
-    logout()
-    window.location.href = '/login'
+  const handleLogout = async () => {
+    try {
+      const supabase = getSupabaseBrowserClient()
+      await supabase.auth.signOut()
+    } catch {
+      // ignore
+    } finally {
+      window.location.href = '/login'
+    }
   }
 
   // Mobile bottom navigation
@@ -97,11 +104,11 @@ export function UserSidebar() {
               <Avatar>
                 <AvatarImage src="" />
                 <AvatarFallback className="bg-orange-100 text-orange-600">
-                  {user?.name?.charAt(0) || 'U'}
+                  {(user?.user_metadata?.name as string)?.charAt(0) || user?.email?.charAt(0) || 'U'}
                 </AvatarFallback>
               </Avatar>
               <div>
-                <p className="font-medium text-gray-900">{user?.name}</p>
+                <p className="font-medium text-gray-900">{(user?.user_metadata?.name as string) || user?.email?.split('@')[0]}</p>
                 <p className="text-sm text-gray-500">{user?.email}</p>
               </div>
             </div>
@@ -154,7 +161,7 @@ export function UserSidebar() {
             <Avatar className="w-8 h-8">
               <AvatarImage src="" />
               <AvatarFallback className="bg-orange-100 text-orange-600 text-xs">
-                {user?.name?.charAt(0) || 'U'}
+                {(user?.user_metadata?.name as string)?.charAt(0) || user?.email?.charAt(0) || 'U'}
               </AvatarFallback>
             </Avatar>
           </div>
@@ -231,11 +238,11 @@ export function UserSidebar() {
               <Avatar>
                 <AvatarImage src="" />
                 <AvatarFallback className="bg-orange-100 text-orange-600">
-                  {user?.name?.charAt(0) || 'U'}
+                  {(user?.user_metadata?.name as string)?.charAt(0) || user?.email?.charAt(0) || 'U'}
                 </AvatarFallback>
               </Avatar>
               <div className="overflow-hidden">
-                <p className="font-medium text-gray-900 truncate">{user?.name}</p>
+                <p className="font-medium text-gray-900 truncate">{(user?.user_metadata?.name as string) || user?.email?.split('@')[0]}</p>
                 <p className="text-sm text-gray-500 truncate">{user?.email}</p>
               </div>
             </div>
@@ -246,7 +253,7 @@ export function UserSidebar() {
               <Avatar>
                 <AvatarImage src="" />
                 <AvatarFallback className="bg-orange-100 text-orange-600">
-                  {user?.name?.charAt(0) || 'U'}
+                  {(user?.user_metadata?.name as string)?.charAt(0) || user?.email?.charAt(0) || 'U'}
                 </AvatarFallback>
               </Avatar>
             </div>

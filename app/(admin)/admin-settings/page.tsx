@@ -26,10 +26,10 @@ import {
   Calendar
 } from "lucide-react"
 import { toast } from "sonner"
-import { useAuthStore } from "@/lib/store"
+import { useSession } from "@/components/session-provider"
 
 export default function AdminSettingsPage() {
-  const { user } = useAuthStore()
+  const { user } = useSession()
   const [isLoading, setIsLoading] = useState(false)
   const [isEditing, setIsEditing] = useState(false)
   const [settings, setSettings] = useState({
@@ -139,7 +139,7 @@ export default function AdminSettingsPage() {
                       <Avatar className="w-24 h-24 mx-auto">
                         <AvatarImage src="" />
                         <AvatarFallback className="bg-red-100 text-red-600 text-2xl">
-                          {user?.name?.charAt(0) || 'A'}
+                          {(user?.user_metadata?.name as string)?.charAt(0) || user?.email?.charAt(0) || 'A'}
                         </AvatarFallback>
                       </Avatar>
                       <label className="absolute bottom-0 right-0 bg-red-500 rounded-full p-2 cursor-pointer hover:bg-red-600 transition-colors">
@@ -152,7 +152,7 @@ export default function AdminSettingsPage() {
                         />
                       </label>
                     </div>
-                    <CardTitle className="mt-4">{user?.name}</CardTitle>
+                    <CardTitle className="mt-4">{(user?.user_metadata?.name as string) || user?.email?.split('@')[0]}</CardTitle>
                     <CardDescription>{user?.email}</CardDescription>
                     <Badge variant="secondary" className="mt-2 bg-red-100 text-red-700">
                       Administrator

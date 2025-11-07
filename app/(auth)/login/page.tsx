@@ -1,26 +1,30 @@
-'use client'
+"use client";
 
-import { motion } from "framer-motion"
-import { useState } from "react"
-import { useRouter } from "next/navigation"
-import Link from "next/link"
-import { Shield, Eye, EyeOff, ArrowLeft } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Checkbox } from "@/components/ui/checkbox"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { loginSchema, type LoginFormData } from "@/lib/validations"
-import { useAuthStore } from "@/lib/store"
-import { toast } from "sonner"
+import { motion } from "framer-motion";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { Shield, Eye, EyeOff, ArrowLeft } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { loginSchema, type LoginFormData } from "@/lib/validations";
+import { toast } from "sonner";
+import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 
 export default function LoginPage() {
-  const [showPassword, setShowPassword] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
-  const router = useRouter()
-  const login = useAuthStore((state) => state.login)
+  const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const {
     register,
@@ -28,70 +32,65 @@ export default function LoginPage() {
     formState: { errors },
   } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
-  })
+  });
 
   const onSubmit = async (data: LoginFormData) => {
-    setIsLoading(true)
-    
-    // Simulate API call
-    setTimeout(() => {
-      // Mock authentication with specific error messages
-      if (!data.email || !data.password) {
-        toast.error('Please fill in all fields')
-        setIsLoading(false)
-        return
+    try {
+      setIsLoading(true);
+      const res = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+      const json = await res.json();
+      if (!res.ok) {
+        toast.error(json.error || "Login failed");
+        setIsLoading(false);
+        return;
       }
-
-      // Check if user exists
-      const existingUsers = [
-        'juan@example.com',
-        'admin@scholarblock.com',
-        'user@example.com'
-      ]
-      
-      if (!existingUsers.includes(data.email.toLowerCase())) {
-        toast.error('User does not exist. Please check your email or create an account.')
-        setIsLoading(false)
-        return
-      }
-
-      // Check credentials
-      if (data.email === 'juan@example.com' && data.password === 'password') {
-        login({
-          id: '1',
-          name: 'Juan Dela Cruz',
-          email: data.email,
-          role: 'user',
-        })
-        toast.success('Login successful!')
-        router.push('/user-dashboard')
-      } else if (data.email === 'admin@scholarblock.com' && data.password === 'admin1234') {
-        login({
-          id: 'admin1',
-          name: 'Admin User',
-          email: data.email,
-          role: 'admin',
-        })
-        toast.success('Login successful!')
-        router.push('/admin-dashboard')
-      } else if (data.email === 'user@example.com' && data.password === 'password') {
-        login({
-          id: '2',
-          name: 'Test User',
-          email: data.email,
-          role: 'user',
-        })
-        toast.success('Login successful!')
-        router.push('/user-dashboard')
+      // Refresh the session on the client side to ensure cookies are synced
+      const supabase = getSupabaseBrowserClient();
+      const { data: sessionData } = await supabase.auth.getSession();
+      if (sessionData?.session) {
+        toast.success("Login successful!");
+        // Check if user is admin and redirect accordingly
+        const user = sessionData.session.user;
+        const isAdmin =
+          user?.email === "admin@scholarblock.com" ||
+          user?.user_metadata?.role === "admin" ||
+          user?.user_metadata?.isAdmin === true;
+        const redirectPath = isAdmin ? "/admin-dashboard" : "/user-dashboard";
+        // Use window.location for a full page reload to ensure session is picked up
+        window.location.href = redirectPath;
       } else {
-        toast.error('Incorrect password. Please try again.')
+        // If session not immediately available, wait a bit and try again
+        await new Promise((resolve) => setTimeout(resolve, 300));
+        const { data: retrySession } = await supabase.auth.getSession();
+        if (retrySession?.session) {
+          toast.success("Login successful!");
+          // Check if user is admin and redirect accordingly
+          const user = retrySession.session.user;
+          const isAdmin =
+            user?.email === "admin@scholarblock.com" ||
+            user?.user_metadata?.role === "admin" ||
+            user?.user_metadata?.isAdmin === true;
+          const redirectPath = isAdmin ? "/admin-dashboard" : "/user-dashboard";
+          window.location.href = redirectPath;
+        } else {
+          toast.error("Session not found. Please try again.");
+          setIsLoading(false);
+        }
       }
-      setIsLoading(false)
-    }, 1000)
-  }
+    } catch (e) {
+      const error = e as Error;
+      toast.error(error.message || "Unexpected error");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 to-white flex items-center justify-center p-4">
+    <div className="min-h-screen bg-linear-to-br from-orange-50 to-white flex items-center justify-center p-4">
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
@@ -112,7 +111,7 @@ export default function LoginPage() {
               Sign in to your ScholarBlock account
             </CardDescription>
           </CardHeader>
-          
+
           <CardContent>
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
               <div className="space-y-2">
@@ -137,7 +136,9 @@ export default function LoginPage() {
                     type={showPassword ? "text" : "password"}
                     placeholder="Enter your password"
                     {...register("password")}
-                    className={errors.password ? "border-red-500 pr-10" : "pr-10"}
+                    className={
+                      errors.password ? "border-red-500 pr-10" : "pr-10"
+                    }
                   />
                   <Button
                     type="button"
@@ -154,7 +155,9 @@ export default function LoginPage() {
                   </Button>
                 </div>
                 {errors.password && (
-                  <p className="text-sm text-red-500">{errors.password.message}</p>
+                  <p className="text-sm text-red-500">
+                    {errors.password.message}
+                  </p>
                 )}
               </div>
 
@@ -173,7 +176,11 @@ export default function LoginPage() {
                 {isLoading ? (
                   <motion.div
                     animate={{ rotate: 360 }}
-                    transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                    transition={{
+                      duration: 1,
+                      repeat: Infinity,
+                      ease: "linear",
+                    }}
                     className="w-5 h-5 border-2 border-white border-t-transparent rounded-full"
                   />
                 ) : (
@@ -191,13 +198,15 @@ export default function LoginPage() {
                   Forgot your password?
                 </Link>
               </div>
-              
+
               <div className="relative">
                 <div className="absolute inset-0 flex items-center">
                   <div className="w-full border-t border-gray-200" />
                 </div>
                 <div className="relative flex justify-center text-sm">
-                  <span className="px-2 bg-white text-gray-500">New to ScholarBlock?</span>
+                  <span className="px-2 bg-white text-gray-500">
+                    New to ScholarBlock?
+                  </span>
                 </div>
               </div>
 
@@ -210,8 +219,10 @@ export default function LoginPage() {
 
             <div className="mt-6 p-4 bg-gray-50 rounded-lg">
               <p className="text-xs text-gray-600 text-center">
-                <strong>Demo Accounts:</strong><br />
-                User: juan@example.com / password<br />
+                <strong>Demo Accounts:</strong>
+                <br />
+                User: juan@example.com / password
+                <br />
                 Admin: admin@scholarblock.com / admin1234
               </p>
             </div>
@@ -229,5 +240,5 @@ export default function LoginPage() {
         </div>
       </motion.div>
     </div>
-  )
+  );
 }

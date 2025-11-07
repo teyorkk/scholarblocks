@@ -25,7 +25,7 @@ import {
   CheckCircle
 } from "lucide-react"
 import { useForm } from "react-hook-form"
-import { useAuthStore } from "@/lib/store"
+import { useSession } from "@/components/session-provider"
 import { toast } from "sonner"
 
 interface ProfileFormData {
@@ -43,7 +43,7 @@ interface PasswordFormData {
 }
 
 export default function SettingsPage() {
-  const { user } = useAuthStore()
+  const { user } = useSession()
   const [isEditing, setIsEditing] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
   const [showPasswordDialog, setShowPasswordDialog] = useState(false)
@@ -55,7 +55,7 @@ export default function SettingsPage() {
     reset: resetProfile,
   } = useForm<ProfileFormData>({
     defaultValues: {
-      name: user?.name || '',
+      name: (user?.user_metadata?.name as string) || '',
       email: user?.email || '',
       phone: '+63 912 335  454',
       address: 'Baryo San Miguel, Hagonoy, Bulacan',
@@ -135,7 +135,7 @@ export default function SettingsPage() {
                       <Avatar className="w-24 h-24 mx-auto">
                         <AvatarImage src="" />
                         <AvatarFallback className="bg-orange-100 text-orange-600 text-2xl">
-                          {user?.name?.charAt(0) || 'U'}
+                          {(user?.user_metadata?.name as string)?.charAt(0) || user?.email?.charAt(0) || 'U'}
                         </AvatarFallback>
                       </Avatar>
                       <label className="absolute bottom-0 right-0 bg-orange-500 rounded-full p-2 cursor-pointer hover:bg-orange-600 transition-colors">
@@ -148,7 +148,7 @@ export default function SettingsPage() {
                         />
                       </label>
                     </div>
-                    <CardTitle className="mt-4">{user?.name}</CardTitle>
+                    <CardTitle className="mt-4">{(user?.user_metadata?.name as string) || user?.email?.split('@')[0]}</CardTitle>
                     <CardDescription>{user?.email}</CardDescription>
                     <Badge variant="secondary" className="mt-2 bg-orange-100 text-orange-700">
                       Student

@@ -1,61 +1,68 @@
-'use client'
+"use client";
 
-import { motion } from "framer-motion"
-import { useState } from "react"
-import React from "react"
-import Link from "next/link"
-import { usePathname } from "next/navigation"
-import { 
-  Home, 
-  Users, 
-  Shield, 
-  Award, 
-  Menu, 
-  X, 
+import { motion } from "framer-motion";
+import { useState } from "react";
+import React from "react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import {
+  Home,
+  Users,
+  Shield,
+  Award,
+  Menu,
+  X,
   LogOut,
   User,
   Settings,
   ChevronLeft,
-  ChevronRight
-} from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { useAuthStore } from "@/lib/store"
-import { useMobile } from "@/hooks/use-mobile"
+  ChevronRight,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useSession } from "./session-provider";
+import { getSupabaseBrowserClient } from "@/lib/supabase/client";
+import { useMobile } from "@/hooks/use-mobile";
 
 const navigation = [
-  { name: 'Dashboard', href: '/admin-dashboard', icon: Home },
-  { name: 'Screening', href: '/screening', icon: Users },
-  { name: 'Blockchain Records', href: '/blockchain', icon: Shield },
-  { name: 'Awarding', href: '/awarding', icon: Award },
-  { name: 'Settings', href: '/admin-settings', icon: Settings },
-]
+  { name: "Dashboard", href: "/admin-dashboard", icon: Home },
+  { name: "Screening", href: "/screening", icon: Users },
+  { name: "Blockchain Records", href: "/blockchain", icon: Shield },
+  { name: "Awarding", href: "/awarding", icon: Award },
+  { name: "Settings", href: "/admin-settings", icon: Settings },
+];
 
 export function AdminSidebar() {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false)
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(() => {
-    if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('admin-sidebar-collapsed')
-      return saved === 'true'
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("admin-sidebar-collapsed");
+      return saved === "true";
     }
-    return false
-  })
-  const pathname = usePathname()
-  const { user, logout } = useAuthStore()
-  const isMobile = useMobile()
+    return false;
+  });
+  const pathname = usePathname();
+  const { user } = useSession();
+  const isMobile = useMobile();
 
   // Save collapse state to localStorage
   React.useEffect(() => {
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('admin-sidebar-collapsed', isCollapsed.toString())
+    if (typeof window !== "undefined") {
+      localStorage.setItem("admin-sidebar-collapsed", isCollapsed.toString());
     }
-  }, [isCollapsed])
+  }, [isCollapsed]);
 
-  const handleLogout = () => {
-    logout()
-    window.location.href = '/'
-  }
+  const handleLogout = async () => {
+    try {
+      const supabase = getSupabaseBrowserClient();
+      await supabase.auth.signOut();
+    } catch {
+      // swallow
+    } finally {
+      window.location.href = "/login";
+    }
+  };
 
   // Mobile bottom navigation
   if (isMobile) {
@@ -83,7 +90,10 @@ export function AdminSidebar() {
               <div className="flex items-center space-x-2">
                 <Shield className="w-6 h-6 text-orange-500" />
                 <span className="font-bold text-lg">ScholarBlock</span>
-                <Badge variant="secondary" className="bg-red-100 text-red-700 text-xs">
+                <Badge
+                  variant="secondary"
+                  className="bg-red-100 text-red-700 text-xs"
+                >
                   Admin
                 </Badge>
               </div>
@@ -102,11 +112,16 @@ export function AdminSidebar() {
               <Avatar>
                 <AvatarImage src="" />
                 <AvatarFallback className="bg-red-100 text-red-600">
-                  {user?.name?.charAt(0) || 'A'}
+                  {(user?.user_metadata?.name as string)?.charAt(0) ||
+                    user?.email?.charAt(0) ||
+                    "A"}
                 </AvatarFallback>
               </Avatar>
               <div>
-                <p className="font-medium text-gray-900">{user?.name}</p>
+                <p className="font-medium text-gray-900">
+                  {(user?.user_metadata?.name as string) ||
+                    user?.email?.split("@")[0]}
+                </p>
                 <p className="text-sm text-gray-500">Administrator</p>
               </div>
             </div>
@@ -118,8 +133,8 @@ export function AdminSidebar() {
                   href={item.href}
                   className={`flex items-center space-x-3 px-3 py-2 rounded-lg transition-colors ${
                     pathname === item.href
-                      ? 'bg-red-50 text-red-600'
-                      : 'text-gray-600 hover:bg-gray-50'
+                      ? "bg-red-50 text-red-600"
+                      : "text-gray-600 hover:bg-gray-50"
                   }`}
                   onClick={() => setIsSidebarOpen(false)}
                 >
@@ -159,7 +174,9 @@ export function AdminSidebar() {
             <Avatar className="w-8 h-8">
               <AvatarImage src="" />
               <AvatarFallback className="bg-red-100 text-red-600 text-xs">
-                {user?.name?.charAt(0) || 'A'}
+                {(user?.user_metadata?.name as string)?.charAt(0) ||
+                  user?.email?.charAt(0) ||
+                  "A"}
               </AvatarFallback>
             </Avatar>
           </div>
@@ -174,8 +191,8 @@ export function AdminSidebar() {
                 href={item.href}
                 className={`flex flex-col items-center p-2 rounded-lg transition-colors ${
                   pathname === item.href
-                    ? 'text-red-600'
-                    : 'text-gray-400 hover:text-gray-600'
+                    ? "text-red-600"
+                    : "text-gray-400 hover:text-gray-600"
                 }`}
               >
                 <item.icon className="w-5 h-5" />
@@ -185,7 +202,7 @@ export function AdminSidebar() {
           </div>
         </nav>
       </>
-    )
+    );
   }
 
   // Desktop Sidebar
@@ -207,7 +224,10 @@ export function AdminSidebar() {
               </div>
               <div className="flex-1">
                 <span className="font-bold text-xl">ScholarBlock</span>
-                <Badge variant="secondary" className="ml-2 bg-red-100 text-red-700 text-xs">
+                <Badge
+                  variant="secondary"
+                  className="ml-2 bg-red-100 text-red-700 text-xs"
+                >
                   Admin
                 </Badge>
               </div>
@@ -241,22 +261,29 @@ export function AdminSidebar() {
               <Avatar>
                 <AvatarImage src="" />
                 <AvatarFallback className="bg-red-100 text-red-600">
-                  {user?.name?.charAt(0) || 'A'}
+                  {(user?.user_metadata?.name as string)?.charAt(0) ||
+                    user?.email?.charAt(0) ||
+                    "A"}
                 </AvatarFallback>
               </Avatar>
               <div className="overflow-hidden">
-                <p className="font-medium text-gray-900 truncate">{user?.name}</p>
+                <p className="font-medium text-gray-900 truncate">
+                  {(user?.user_metadata?.name as string) ||
+                    user?.email?.split("@")[0]}
+                </p>
                 <p className="text-sm text-gray-500 truncate">Administrator</p>
               </div>
             </div>
           )}
-          
+
           {isCollapsed && (
             <div className="flex justify-center mb-6">
               <Avatar>
                 <AvatarImage src="" />
                 <AvatarFallback className="bg-red-100 text-red-600">
-                  {user?.name?.charAt(0) || 'A'}
+                  {(user?.user_metadata?.name as string)?.charAt(0) ||
+                    user?.email?.charAt(0) ||
+                    "A"}
                 </AvatarFallback>
               </Avatar>
             </div>
@@ -268,15 +295,19 @@ export function AdminSidebar() {
               <Link
                 key={item.name}
                 href={item.href}
-                className={`flex items-center ${isCollapsed ? 'justify-center' : 'space-x-3'} px-3 py-2 rounded-lg transition-colors ${
+                className={`flex items-center ${
+                  isCollapsed ? "justify-center" : "space-x-3"
+                } px-3 py-2 rounded-lg transition-colors ${
                   pathname === item.href
-                    ? 'bg-red-50 text-red-600'
-                    : 'text-gray-600 hover:bg-gray-50'
+                    ? "bg-red-50 text-red-600"
+                    : "text-gray-600 hover:bg-gray-50"
                 }`}
-                title={isCollapsed ? item.name : ''}
+                title={isCollapsed ? item.name : ""}
               >
                 <item.icon className="w-5 h-5" />
-                {!isCollapsed && <span className="font-medium">{item.name}</span>}
+                {!isCollapsed && (
+                  <span className="font-medium">{item.name}</span>
+                )}
               </Link>
             ))}
           </nav>
@@ -285,9 +316,11 @@ export function AdminSidebar() {
           <div className="mt-6 pt-6 border-t">
             <Button
               variant="ghost"
-              className={`w-full ${isCollapsed ? 'justify-center px-2' : 'justify-start'} text-red-600 hover:text-red-700 hover:bg-red-50`}
+              className={`w-full ${
+                isCollapsed ? "justify-center px-2" : "justify-start"
+              } text-red-600 hover:text-red-700 hover:bg-red-50`}
               onClick={handleLogout}
-              title={isCollapsed ? 'Logout' : ''}
+              title={isCollapsed ? "Logout" : ""}
             >
               <LogOut className="w-4 h-4" />
               {!isCollapsed && <span className="ml-2">Logout</span>}
@@ -305,7 +338,8 @@ export function AdminSidebar() {
       >
         <div className="flex items-center justify-between">
           <h1 className="text-2xl font-bold text-gray-900">
-            {navigation.find(item => item.href === pathname)?.name || 'Dashboard'}
+            {navigation.find((item) => item.href === pathname)?.name ||
+              "Dashboard"}
           </h1>
           <div className="flex items-center space-x-4">
             <Button variant="ghost" size="icon">
@@ -318,5 +352,5 @@ export function AdminSidebar() {
         </div>
       </motion.header>
     </>
-  )
+  );
 }

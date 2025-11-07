@@ -1,32 +1,38 @@
-'use client'
+"use client";
 
-import { motion } from "framer-motion"
-import { useState } from "react"
-import { useRouter } from "next/navigation"
-import Link from "next/link"
-import { Shield, Eye, EyeOff, ArrowLeft, User, Mail, Lock } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { OTPVerification } from "@/components/ui/otp-verification"
-import { PasswordStrength } from "@/components/ui/password-strength"
-import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { registerSchema, type RegisterFormData } from "@/lib/validations"
-import { useAuthStore } from "@/lib/store"
-import { toast } from "sonner"
+import { motion } from "framer-motion";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { Shield, Eye, EyeOff, ArrowLeft, User, Mail, Lock } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { OTPVerification } from "@/components/ui/otp-verification";
+import { PasswordStrength } from "@/components/ui/password-strength";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { registerSchema, type RegisterFormData } from "@/lib/validations";
+// Auth state now handled by SessionProvider; local store removed
+import { toast } from "sonner";
 
 export default function RegisterPage() {
-  const [showPassword, setShowPassword] = useState(false)
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
-  const [showOTPModal, setShowOTPModal] = useState(false)
-  const [isVerifyingOTP, setIsVerifyingOTP] = useState(false)
-  const [generatedOTP, setGeneratedOTP] = useState('')
-  const [pendingUserData, setPendingUserData] = useState<RegisterFormData | null>(null)
-  const router = useRouter()
-  const login = useAuthStore((state) => state.login)
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [showOTPModal, setShowOTPModal] = useState(false);
+  const [isVerifyingOTP, setIsVerifyingOTP] = useState(false);
+  const [pendingUserData, setPendingUserData] =
+    useState<RegisterFormData | null>(null);
+  const router = useRouter();
+  // SessionProvider will pick up auth changes; no manual login state needed
 
   const {
     register,
@@ -35,97 +41,94 @@ export default function RegisterPage() {
     watch,
   } = useForm<RegisterFormData>({
     resolver: zodResolver(registerSchema),
-  })
+  });
 
-  const password = watch('password', '')
+  const password = watch("password", "");
 
   const onSubmit = async (data: RegisterFormData) => {
-    setIsLoading(true)
-    
-    // Check if user already exists
-    const existingUsers = [
-      'juan@example.com',
-      'admin@scholarblock.com',
-      'user@example.com'
-    ]
-    
-    if (existingUsers.includes(data.email.toLowerCase())) {
-      toast.error('User already exists. Please use a different email or login.')
-      setIsLoading(false)
-      return
+    try {
+      setIsLoading(true);
+      setPendingUserData(data);
+      const res = await fetch("/api/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: data.name,
+          email: data.email,
+          password: data.password,
+        }),
+      });
+      const json = await res.json();
+      if (!res.ok) {
+        toast.error(json.error || "Registration failed");
+        setIsLoading(false);
+        return;
+      }
+      // Supabase will send email confirmation if enabled; we present OTP modal for manual code entry (user will input 6-digit code sent by Supabase)
+      setShowOTPModal(true);
+      toast.info(`Check your email for a verification code.`);
+    } catch (e) {
+      const error = e as Error;
+      toast.error(error.message || "Unexpected error");
+    } finally {
+      setIsLoading(false);
     }
-    
-    // Check password requirements
-    if (data.password.length < 8) {
-      toast.error('Password must be at least 8 characters long.')
-      setIsLoading(false)
-      return
-    }
-    
-    // Check for strong password requirements
-    const hasUpperCase = /[A-Z]/.test(data.password)
-    const hasLowerCase = /[a-z]/.test(data.password)
-    const hasNumbers = /\d/.test(data.password)
-    const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(data.password)
-    
-    if (!hasUpperCase || !hasLowerCase || !hasNumbers || !hasSpecialChar) {
-      toast.error('Password must include uppercase, lowercase, numbers, and special characters.')
-      setIsLoading(false)
-      return
-    }
-    
-    if (data.password !== data.confirmPassword) {
-      toast.error('Passwords do not match. Please check and try again.')
-      setIsLoading(false)
-      return
-    }
-    
-    // Generate 8-digit OTP
-    const otp = Math.floor(10000000 + Math.random() * 90000000).toString()
-    setGeneratedOTP(otp)
-    setPendingUserData(data)
-    
-    // Show OTP modal instead of directly registering
-    setTimeout(() => {
-      setIsLoading(false)
-      setShowOTPModal(true)
-      toast.info(`OTP sent to ${data.email}: ${otp} (for demo purposes)`)
-    }, 1000)
-  }
+  };
 
   const handleOTPVerify = async (otp: string) => {
-    setIsVerifyingOTP(true)
-    
-    // Simulate OTP verification
-    setTimeout(() => {
-      if (otp === generatedOTP && pendingUserData) {
-        // OTP is correct, proceed with registration
-        const newUser = {
-          id: Date.now().toString(),
-          name: pendingUserData.name,
-          email: pendingUserData.email,
-          role: 'user' as const,
-        }
-        
-        login(newUser)
-        toast.success('Registration successful! Welcome to ScholarBlock.')
-        setShowOTPModal(false)
-        router.push('/user-dashboard')
-      } else {
-        toast.error('Invalid OTP. Please try again.')
+    try {
+      setIsVerifyingOTP(true);
+      if (!pendingUserData) {
+        toast.error("No pending user data.");
+        return;
       }
-      setIsVerifyingOTP(false)
-    }, 1500)
-  }
+      const res = await fetch("/api/auth/verify-otp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: pendingUserData.email,
+          code: otp,
+          context: "register",
+        }),
+      });
+      const json = await res.json();
+      if (!res.ok) {
+        toast.error(json.error || "Verification failed");
+        return;
+      }
+      toast.success("Registration verified! You can now sign in.");
+      setShowOTPModal(false);
+      router.push("/login");
+    } catch (e) {
+      const error = e as Error;
+      toast.error(error.message || "Unexpected error");
+    } finally {
+      setIsVerifyingOTP(false);
+    }
+  };
 
-  const handleResendOTP = () => {
-    const otp = Math.floor(10000000 + Math.random() * 90000000).toString()
-    setGeneratedOTP(otp)
-    toast.info(`New OTP sent: ${otp} (for demo purposes)`)
-  }
+  const handleResendOTP = async () => {
+    if (!pendingUserData) return;
+    // Re-trigger signUp to resend email
+    const res = await fetch("/api/auth/register", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        name: pendingUserData.name,
+        email: pendingUserData.email,
+        password: pendingUserData.password,
+      }),
+    });
+    const json = await res.json();
+    if (!res.ok) {
+      toast.error(json.error || "Failed to resend code");
+      return;
+    }
+    toast.info("Verification code resent.");
+  };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 to-white flex items-center justify-center p-4">
+  <div className="min-h-screen bg-linear-to-br from-orange-50 to-white flex items-center justify-center p-4">
       <motion.div
         initial={{ opacity: 0, x: 20 }}
         animate={{ opacity: 1, x: 0 }}
@@ -146,7 +149,7 @@ export default function RegisterPage() {
               Join ScholarBlock and start your scholarship journey
             </CardDescription>
           </CardHeader>
-          
+
           <CardContent>
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
               <div className="space-y-2">
@@ -192,7 +195,9 @@ export default function RegisterPage() {
                     type={showPassword ? "text" : "password"}
                     placeholder="Create a strong password"
                     {...register("password")}
-                    className={`pl-10 pr-10 ${errors.password ? "border-red-500" : ""}`}
+                    className={`pl-10 pr-10 ${
+                      errors.password ? "border-red-500" : ""
+                    }`}
                   />
                   <Button
                     type="button"
@@ -209,7 +214,9 @@ export default function RegisterPage() {
                   </Button>
                 </div>
                 {errors.password && (
-                  <p className="text-sm text-red-500">{errors.password.message}</p>
+                  <p className="text-sm text-red-500">
+                    {errors.password.message}
+                  </p>
                 )}
                 <PasswordStrength password={password} />
               </div>
@@ -223,7 +230,9 @@ export default function RegisterPage() {
                     type={showConfirmPassword ? "text" : "password"}
                     placeholder="Confirm your password"
                     {...register("confirmPassword")}
-                    className={`pl-10 pr-10 ${errors.confirmPassword ? "border-red-500" : ""}`}
+                    className={`pl-10 pr-10 ${
+                      errors.confirmPassword ? "border-red-500" : ""
+                    }`}
                   />
                   <Button
                     type="button"
@@ -240,7 +249,9 @@ export default function RegisterPage() {
                   </Button>
                 </div>
                 {errors.confirmPassword && (
-                  <p className="text-sm text-red-500">{errors.confirmPassword.message}</p>
+                  <p className="text-sm text-red-500">
+                    {errors.confirmPassword.message}
+                  </p>
                 )}
               </div>
 
@@ -252,7 +263,11 @@ export default function RegisterPage() {
                 {isLoading ? (
                   <motion.div
                     animate={{ rotate: 360 }}
-                    transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                    transition={{
+                      duration: 1,
+                      repeat: Infinity,
+                      ease: "linear",
+                    }}
                     className="w-5 h-5 border-2 border-white border-t-transparent rounded-full"
                   />
                 ) : (
@@ -267,7 +282,9 @@ export default function RegisterPage() {
                   <div className="w-full border-t border-gray-200" />
                 </div>
                 <div className="relative flex justify-center text-sm">
-                  <span className="px-2 bg-white text-gray-500">Already have an account?</span>
+                  <span className="px-2 bg-white text-gray-500">
+                    Already have an account?
+                  </span>
                 </div>
               </div>
 
@@ -280,7 +297,8 @@ export default function RegisterPage() {
 
             <div className="mt-6 p-4 bg-gray-50 rounded-lg">
               <p className="text-xs text-gray-600 text-center">
-                By creating an account, you agree to our Terms of Service and Privacy Policy.
+                By creating an account, you agree to our Terms of Service and
+                Privacy Policy.
               </p>
             </div>
           </CardContent>
@@ -305,7 +323,8 @@ export default function RegisterPage() {
         onResend={handleResendOTP}
         isLoading={isVerifyingOTP}
         email={pendingUserData?.email}
+  length={6}
       />
     </div>
-  )
+  );
 }

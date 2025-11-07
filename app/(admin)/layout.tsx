@@ -3,7 +3,7 @@
 import { motion } from "framer-motion"
 import { useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { useAuthStore } from "@/lib/store"
+import { useSession } from "@/components/session-provider"
 
 export default function AdminLayout({
   children,
@@ -11,17 +11,17 @@ export default function AdminLayout({
   children: React.ReactNode
 }) {
   const router = useRouter()
-  const { isAuthenticated, user } = useAuthStore()
+  const { ready, user } = useSession()
+  const hydrated = ready && typeof window !== 'undefined'
 
   useEffect(() => {
-    if (!isAuthenticated) {
+    if (!hydrated) return
+    if (!user) {
       router.push('/login')
-    } else if (user?.role !== 'admin') {
-      router.push('/user-dashboard')
     }
-  }, [isAuthenticated, user, router])
+  }, [hydrated, user, router])
 
-  if (!isAuthenticated || user?.role !== 'admin') {
+  if (!hydrated || !user) {
     return null
   }
 

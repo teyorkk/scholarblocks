@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
 import { AnimatePresence } from "framer-motion";
+import { SessionProvider } from "@/components/session-provider";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -22,9 +23,11 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={cn("min-h-screen bg-background font-sans antialiased", inter.variable)}>
-        <AnimatePresence mode="wait">
-          {children}
-        </AnimatePresence>
+        <SessionProvider>
+          <AnimatePresence mode="wait">
+            {children}
+          </AnimatePresence>
+        </SessionProvider>
       </body>
     </html>
   );
