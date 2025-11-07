@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { PasswordStrength } from "@/components/ui/password-strength"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { resetPasswordSchema, type ResetPasswordFormData } from "@/lib/validations"
@@ -23,12 +24,48 @@ export default function ResetPasswordPage() {
     register,
     handleSubmit,
     formState: { errors },
+    watch,
   } = useForm<ResetPasswordFormData>({
     resolver: zodResolver(resetPasswordSchema),
   })
 
-  const onSubmit = async () => {
+  const password = watch('password', '')
+
+  const onSubmit = async (data: ResetPasswordFormData) => {
     setIsLoading(true)
+    
+    // Check password requirements
+    if (data.password.length < 8) {
+      toast.error('Password must be at least 8 characters long.')
+      setIsLoading(false)
+      return
+    }
+    
+    // Check for strong password requirements
+    const hasUpperCase = /[A-Z]/.test(data.password)
+    const hasLowerCase = /[a-z]/.test(data.password)
+    const hasNumbers = /\d/.test(data.password)
+    const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(data.password)
+    
+    if (!hasUpperCase || !hasLowerCase || !hasNumbers || !hasSpecialChar) {
+      toast.error('Password must include uppercase, lowercase, numbers, and special characters.')
+      setIsLoading(false)
+      return
+    }
+    
+    if (data.password !== data.confirmPassword) {
+      toast.error('Passwords do not match. Please check and try again.')
+      setIsLoading(false)
+      return
+    }
+    
+    // Check if password is too common
+    const commonPasswords = ['password', '123456', 'qwerty', 'abc123']
+    if (commonPasswords.includes(data.password.toLowerCase())) {
+      toast.error('Please choose a stronger password. Avoid common passwords.')
+      setIsLoading(false)
+      return
+    }
     
     // Simulate API call
     setTimeout(() => {
@@ -136,7 +173,7 @@ export default function ResetPasswordPage() {
                   <Input
                     id="password"
                     type={showPassword ? "text" : "password"}
-                    placeholder="Enter new password"
+                    placeholder="Create a strong password"
                     {...register("password")}
                     className={`pl-10 pr-10 ${errors.password ? "border-red-500" : ""}`}
                   />
@@ -157,6 +194,7 @@ export default function ResetPasswordPage() {
                 {errors.password && (
                   <p className="text-sm text-red-500">{errors.password.message}</p>
                 )}
+                <PasswordStrength password={password} />
               </div>
 
               <div className="space-y-2">
@@ -189,15 +227,7 @@ export default function ResetPasswordPage() {
                 )}
               </div>
 
-              <div className="p-3 bg-blue-50 rounded-lg">
-                <p className="text-xs text-blue-700">
-                  <strong>Password requirements:</strong><br />
-                  • At least 6 characters long<br />
-                  • Should include letters and numbers<br />
-                  • Avoid common passwords
-                </p>
-              </div>
-
+            
               <Button
                 type="submit"
                 className="w-full bg-orange-500 hover:bg-orange-600"

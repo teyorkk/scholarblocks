@@ -35,7 +35,27 @@ export default function LoginPage() {
     
     // Simulate API call
     setTimeout(() => {
-      // Mock authentication
+      // Mock authentication with specific error messages
+      if (!data.email || !data.password) {
+        toast.error('Please fill in all fields')
+        setIsLoading(false)
+        return
+      }
+
+      // Check if user exists
+      const existingUsers = [
+        'juan@example.com',
+        'admin@scholarblock.com',
+        'user@example.com'
+      ]
+      
+      if (!existingUsers.includes(data.email.toLowerCase())) {
+        toast.error('User does not exist. Please check your email or create an account.')
+        setIsLoading(false)
+        return
+      }
+
+      // Check credentials
       if (data.email === 'juan@example.com' && data.password === 'password') {
         login({
           id: '1',
@@ -54,8 +74,17 @@ export default function LoginPage() {
         })
         toast.success('Login successful!')
         router.push('/admin-dashboard')
+      } else if (data.email === 'user@example.com' && data.password === 'password') {
+        login({
+          id: '2',
+          name: 'Test User',
+          email: data.email,
+          role: 'user',
+        })
+        toast.success('Login successful!')
+        router.push('/user-dashboard')
       } else {
-        toast.error('Invalid email or password')
+        toast.error('Incorrect password. Please try again.')
       }
       setIsLoading(false)
     }, 1000)
@@ -183,7 +212,7 @@ export default function LoginPage() {
               <p className="text-xs text-gray-600 text-center">
                 <strong>Demo Accounts:</strong><br />
                 User: juan@example.com / password<br />
-                Admin: admin@scholarblock.com / admin
+                Admin: admin@scholarblock.com / admin1234
               </p>
             </div>
           </CardContent>

@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion"
 import { useState } from "react"
+import React from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { 
@@ -28,14 +29,28 @@ const navigation = [
   { name: 'Screening', href: '/screening', icon: Users },
   { name: 'Blockchain Records', href: '/blockchain', icon: Shield },
   { name: 'Awarding', href: '/awarding', icon: Award },
+  { name: 'Settings', href: '/admin-settings', icon: Settings },
 ]
 
 export function AdminSidebar() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
-  const [isCollapsed, setIsCollapsed] = useState(false)
+  const [isCollapsed, setIsCollapsed] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('admin-sidebar-collapsed')
+      return saved === 'true'
+    }
+    return false
+  })
   const pathname = usePathname()
   const { user, logout } = useAuthStore()
   const isMobile = useMobile()
+
+  // Save collapse state to localStorage
+  React.useEffect(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('admin-sidebar-collapsed', isCollapsed.toString())
+    }
+  }, [isCollapsed])
 
   const handleLogout = () => {
     logout()

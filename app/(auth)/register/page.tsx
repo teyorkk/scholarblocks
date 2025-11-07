@@ -9,6 +9,8 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { OTPVerification } from "@/components/ui/otp-verification"
+import { PasswordStrength } from "@/components/ui/password-strength"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { registerSchema, type RegisterFormData } from "@/lib/validations"
@@ -19,6 +21,10 @@ export default function RegisterPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
+  const [showOTPModal, setShowOTPModal] = useState(false)
+  const [isVerifyingOTP, setIsVerifyingOTP] = useState(false)
+  const [generatedOTP, setGeneratedOTP] = useState('')
+  const [pendingUserData, setPendingUserData] = useState<RegisterFormData | null>(null)
   const router = useRouter()
   const login = useAuthStore((state) => state.login)
 
@@ -26,28 +32,96 @@ export default function RegisterPage() {
     register,
     handleSubmit,
     formState: { errors },
+    watch,
   } = useForm<RegisterFormData>({
     resolver: zodResolver(registerSchema),
   })
 
+  const password = watch('password', '')
+
   const onSubmit = async (data: RegisterFormData) => {
     setIsLoading(true)
     
-    // Simulate API call
-    setTimeout(() => {
-      // Mock registration and auto-login
-      const newUser = {
-        id: Date.now().toString(),
-        name: data.name,
-        email: data.email,
-        role: 'user' as const,
-      }
-      
-      login(newUser)
-      toast.success('Registration successful! Welcome to ScholarBlock.')
-      router.push('/user/dashboard')
+    // Check if user already exists
+    const existingUsers = [
+      'juan@example.com',
+      'admin@scholarblock.com',
+      'user@example.com'
+    ]
+    
+    if (existingUsers.includes(data.email.toLowerCase())) {
+      toast.error('User already exists. Please use a different email or login.')
       setIsLoading(false)
+      return
+    }
+    
+    // Check password requirements
+    if (data.password.length < 8) {
+      toast.error('Password must be at least 8 characters long.')
+      setIsLoading(false)
+      return
+    }
+    
+    // Check for strong password requirements
+    const hasUpperCase = /[A-Z]/.test(data.password)
+    const hasLowerCase = /[a-z]/.test(data.password)
+    const hasNumbers = /\d/.test(data.password)
+    const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(data.password)
+    
+    if (!hasUpperCase || !hasLowerCase || !hasNumbers || !hasSpecialChar) {
+      toast.error('Password must include uppercase, lowercase, numbers, and special characters.')
+      setIsLoading(false)
+      return
+    }
+    
+    if (data.password !== data.confirmPassword) {
+      toast.error('Passwords do not match. Please check and try again.')
+      setIsLoading(false)
+      return
+    }
+    
+    // Generate 8-digit OTP
+    const otp = Math.floor(10000000 + Math.random() * 90000000).toString()
+    setGeneratedOTP(otp)
+    setPendingUserData(data)
+    
+    // Show OTP modal instead of directly registering
+    setTimeout(() => {
+      setIsLoading(false)
+      setShowOTPModal(true)
+      toast.info(`OTP sent to ${data.email}: ${otp} (for demo purposes)`)
+    }, 1000)
+  }
+
+  const handleOTPVerify = async (otp: string) => {
+    setIsVerifyingOTP(true)
+    
+    // Simulate OTP verification
+    setTimeout(() => {
+      if (otp === generatedOTP && pendingUserData) {
+        // OTP is correct, proceed with registration
+        const newUser = {
+          id: Date.now().toString(),
+          name: pendingUserData.name,
+          email: pendingUserData.email,
+          role: 'user' as const,
+        }
+        
+        login(newUser)
+        toast.success('Registration successful! Welcome to ScholarBlock.')
+        setShowOTPModal(false)
+        router.push('/user-dashboard')
+      } else {
+        toast.error('Invalid OTP. Please try again.')
+      }
+      setIsVerifyingOTP(false)
     }, 1500)
+  }
+
+  const handleResendOTP = () => {
+    const otp = Math.floor(10000000 + Math.random() * 90000000).toString()
+    setGeneratedOTP(otp)
+    toast.info(`New OTP sent: ${otp} (for demo purposes)`)
   }
 
   return (
@@ -116,7 +190,7 @@ export default function RegisterPage() {
                   <Input
                     id="password"
                     type={showPassword ? "text" : "password"}
-                    placeholder="Create a password"
+                    placeholder="Create a strong password"
                     {...register("password")}
                     className={`pl-10 pr-10 ${errors.password ? "border-red-500" : ""}`}
                   />
@@ -137,6 +211,7 @@ export default function RegisterPage() {
                 {errors.password && (
                   <p className="text-sm text-red-500">{errors.password.message}</p>
                 )}
+                <PasswordStrength password={password} />
               </div>
 
               <div className="space-y-2">
@@ -221,6 +296,16 @@ export default function RegisterPage() {
           </Link>
         </div>
       </motion.div>
+
+      {/* OTP Verification Modal */}
+      <OTPVerification
+        isOpen={showOTPModal}
+        onClose={() => setShowOTPModal(false)}
+        onVerify={handleOTPVerify}
+        onResend={handleResendOTP}
+        isLoading={isVerifyingOTP}
+        email={pendingUserData?.email}
+      />
     </div>
   )
 }

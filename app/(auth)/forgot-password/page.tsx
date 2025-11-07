@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { OTPVerification } from "@/components/ui/otp-verification"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { forgotPasswordSchema, type ForgotPasswordFormData } from "@/lib/validations"
@@ -16,6 +17,10 @@ import { toast } from "sonner"
 export default function ForgotPasswordPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [isSubmitted, setIsSubmitted] = useState(false)
+  const [showOTPModal, setShowOTPModal] = useState(false)
+  const [isVerifyingOTP, setIsVerifyingOTP] = useState(false)
+  const [generatedOTP, setGeneratedOTP] = useState('')
+  const [userEmail, setUserEmail] = useState('')
 
   const {
     register,
@@ -25,15 +30,56 @@ export default function ForgotPasswordPage() {
     resolver: zodResolver(forgotPasswordSchema),
   })
 
-  const onSubmit = async () => {
+  const onSubmit = async (data: ForgotPasswordFormData) => {
     setIsLoading(true)
+    setUserEmail(data.email)
     
-    // Simulate API call
-    setTimeout(() => {
-      setIsSubmitted(true)
-      toast.success('Reset instructions sent to your email!')
+    // Check if user exists
+    const existingUsers = [
+      'juan@example.com',
+      'admin@scholarblock.com',
+      'user@example.com'
+    ]
+    
+    if (!existingUsers.includes(data.email.toLowerCase())) {
+      toast.error('User does not exist. Please check your email address.')
       setIsLoading(false)
+      return
+    }
+    
+    // Generate 8-digit OTP
+    const otp = Math.floor(10000000 + Math.random() * 90000000).toString()
+    setGeneratedOTP(otp)
+    
+    // Show OTP modal instead of directly sending reset instructions
+    setTimeout(() => {
+      setIsLoading(false)
+      setShowOTPModal(true)
+      toast.info(`OTP sent to ${data.email}: ${otp} (for demo purposes)`)
     }, 1000)
+  }
+
+  const handleOTPVerify = async (otp: string) => {
+    setIsVerifyingOTP(true)
+    
+    // Simulate OTP verification
+    setTimeout(() => {
+      if (otp === generatedOTP) {
+        // OTP is correct, proceed with password reset
+        setShowOTPModal(false)
+        setIsSubmitted(true)
+        toast.success('Email verified! You can now reset your password.')
+      } else {
+        toast.error('Invalid OTP. Please try again.')
+      }
+      setIsVerifyingOTP(false)
+    }, 1500)
+  }
+
+  const handleResendOTP = () => {
+    const otp = Math.floor(10000000 + Math.random() * 90000000).toString()
+    setGeneratedOTP(otp)
+    toast.info(`New OTP sent to ${userEmail}: ${otp} (for demo purposes)`)
   }
 
   if (isSubmitted) {
@@ -198,6 +244,18 @@ export default function ForgotPasswordPage() {
           </Link>
         </div>
       </motion.div>
+
+      {/* OTP Verification Modal */}
+      <OTPVerification
+        isOpen={showOTPModal}
+        onClose={() => setShowOTPModal(false)}
+        onVerify={handleOTPVerify}
+        onResend={handleResendOTP}
+        isLoading={isVerifyingOTP}
+        email={userEmail}
+        title="Verify Your Email"
+        description="Enter the 8-digit verification code sent to your email address."
+      />
     </div>
   )
 }

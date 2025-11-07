@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion"
 import { useState } from "react"
+import React from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { 
@@ -26,19 +27,32 @@ const navigation = [
   { name: 'Dashboard', href: '/user-dashboard', icon: Home },
   { name: 'Application', href: '/application', icon: FileText },
   { name: 'History', href: '/history', icon: History },
-  { name: 'Settings', href: '/settings', icon: Settings },
+  { name: 'Settings', href: '/user-settings', icon: Settings },
 ]
 
 export function UserSidebar() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
-  const [isCollapsed, setIsCollapsed] = useState(false)
+  const [isCollapsed, setIsCollapsed] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('user-sidebar-collapsed')
+      return saved === 'true'
+    }
+    return false
+  })
   const pathname = usePathname()
   const { user, logout } = useAuthStore()
   const isMobile = useMobile()
 
+  // Save collapse state to localStorage
+  React.useEffect(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('user-sidebar-collapsed', isCollapsed.toString())
+    }
+  }, [isCollapsed])
+
   const handleLogout = () => {
     logout()
-    window.location.href = '/'
+    window.location.href = '/login'
   }
 
   // Mobile bottom navigation

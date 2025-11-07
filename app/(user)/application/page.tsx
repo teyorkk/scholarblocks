@@ -32,6 +32,7 @@ const steps = [
   { id: 2, name: 'Upload ID', icon: Upload },
   { id: 3, name: 'Face Scan', icon: Camera },
   { id: 4, name: 'Personal Info', icon: User },
+  { id: 5, name: 'Upload Documents', icon: Upload },
 ]
 
 export default function ApplicationPage() {
@@ -39,6 +40,8 @@ export default function ApplicationPage() {
   const [isSubmitted, setIsSubmitted] = useState(false)
   const [uploadedFile, setUploadedFile] = useState<File | null>(null)
   const [isScanning, setIsScanning] = useState(false)
+  const [certificateOfGrades, setCertificateOfGrades] = useState<File | null>(null)
+  const [certificateOfRegistration, setCertificateOfRegistration] = useState<File | null>(null)
 
   const {
     register,
@@ -57,8 +60,40 @@ export default function ApplicationPage() {
     }
   }
 
+  const onDropGrades = (acceptedFiles: File[]) => {
+    if (acceptedFiles.length > 0) {
+      setCertificateOfGrades(acceptedFiles[0])
+      setValue('certificateOfGrades', acceptedFiles[0])
+    }
+  }
+
+  const onDropRegistration = (acceptedFiles: File[]) => {
+    if (acceptedFiles.length > 0) {
+      setCertificateOfRegistration(acceptedFiles[0])
+      setValue('certificateOfRegistration', acceptedFiles[0])
+    }
+  }
+
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
+    accept: {
+      'image/*': ['.jpeg', '.jpg', '.png'],
+      'application/pdf': ['.pdf']
+    },
+    maxFiles: 1,
+  })
+
+  const { getRootProps: getRootPropsGrades, getInputProps: getInputPropsGrades, isDragActive: isDragActiveGrades } = useDropzone({
+    onDrop: onDropGrades,
+    accept: {
+      'image/*': ['.jpeg', '.jpg', '.png'],
+      'application/pdf': ['.pdf']
+    },
+    maxFiles: 1,
+  })
+
+  const { getRootProps: getRootPropsRegistration, getInputProps: getInputPropsRegistration, isDragActive: isDragActiveRegistration } = useDropzone({
+    onDrop: onDropRegistration,
     accept: {
       'image/*': ['.jpeg', '.jpg', '.png'],
       'application/pdf': ['.pdf']
@@ -166,7 +201,7 @@ export default function ApplicationPage() {
               <CardContent>
                 <div className="space-y-4">
                   <Progress value={(currentStep / steps.length) * 100} className="h-2" />
-                  <div className="grid grid-cols-4 gap-2">
+                  <div className="grid grid-cols-5 gap-2">
                     {steps.map((step) => (
                       <div
                         key={step.id}
@@ -351,7 +386,7 @@ export default function ApplicationPage() {
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+                    <form className="space-y-4">
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="space-y-2">
                           <Label htmlFor="fullName">Full Name</Label>
@@ -460,6 +495,89 @@ export default function ApplicationPage() {
                   </CardContent>
                 </Card>
               )}
+
+              {currentStep === 5 && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center">
+                      <Upload className="w-5 h-5 mr-2 text-orange-500" />
+                      Upload Required Documents
+                    </CardTitle>
+                    <CardDescription>
+                      Upload your certificate of grades and certificate of registration
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-6">
+                    {/* Certificate of Grades Upload */}
+                    <div>
+                      <Label className="text-sm font-medium mb-2 block">Certificate of Grades</Label>
+                      <div
+                        {...getRootPropsGrades()}
+                        className={`border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-colors ${
+                          isDragActiveGrades ? 'border-orange-500 bg-orange-50' : 'border-gray-300 hover:border-gray-400'
+                        }`}
+                      >
+                        <input {...getInputPropsGrades()} />
+                        <Upload className="w-10 h-10 mx-auto mb-3 text-gray-400" />
+                        {certificateOfGrades ? (
+                          <div>
+                            <p className="font-medium text-green-600">{certificateOfGrades.name}</p>
+                            <p className="text-sm text-gray-500">File uploaded successfully</p>
+                          </div>
+                        ) : (
+                          <div>
+                            <p className="font-medium text-gray-900">
+                              {isDragActiveGrades ? 'Drop the file here' : 'Click to upload or drag and drop'}
+                            </p>
+                            <p className="text-sm text-gray-500">PDF, JPG, or PNG (max. 5MB)</p>
+                          </div>
+                        )}
+                      </div>
+                      {errors.certificateOfGrades && (
+                        <p className="text-sm text-red-500 mt-2">{errors.certificateOfGrades.message}</p>
+                      )}
+                    </div>
+
+                    {/* Certificate of Registration Upload */}
+                    <div>
+                      <Label className="text-sm font-medium mb-2 block">Certificate of Registration</Label>
+                      <div
+                        {...getRootPropsRegistration()}
+                        className={`border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-colors ${
+                          isDragActiveRegistration ? 'border-orange-500 bg-orange-50' : 'border-gray-300 hover:border-gray-400'
+                        }`}
+                      >
+                        <input {...getInputPropsRegistration()} />
+                        <Upload className="w-10 h-10 mx-auto mb-3 text-gray-400" />
+                        {certificateOfRegistration ? (
+                          <div>
+                            <p className="font-medium text-green-600">{certificateOfRegistration.name}</p>
+                            <p className="text-sm text-gray-500">File uploaded successfully</p>
+                          </div>
+                        ) : (
+                          <div>
+                            <p className="font-medium text-gray-900">
+                              {isDragActiveRegistration ? 'Drop the file here' : 'Click to upload or drag and drop'}
+                            </p>
+                            <p className="text-sm text-gray-500">PDF, JPG, or PNG (max. 5MB)</p>
+                          </div>
+                        )}
+                      </div>
+                      {errors.certificateOfRegistration && (
+                        <p className="text-sm text-red-500 mt-2">{errors.certificateOfRegistration.message}</p>
+                      )}
+                    </div>
+
+                    <div className="bg-blue-50 p-4 rounded-lg">
+                      <p className="text-sm text-blue-700">
+                        <strong>Note:</strong> Please ensure that all documents are clear and readable. 
+                        The certificate of grades should show your academic performance for the latest semester, 
+                        and the certificate of registration should prove your current enrollment status.
+                      </p>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
             </motion.div>
 
             {/* Navigation Buttons */}
@@ -474,14 +592,14 @@ export default function ApplicationPage() {
               </Button>
               
               <Button
-                onClick={currentStep === 4 ? handleSubmit(onSubmit) : nextStep}
+                onClick={currentStep === 5 ? handleSubmit(onSubmit) : nextStep}
                 disabled={
                   (currentStep === 1 && !watch('type')) ||
                   (currentStep === 2 && !uploadedFile) ||
-                  (currentStep === 4 && !watch('fullName'))
+                  (currentStep === 5 && (!certificateOfGrades || !certificateOfRegistration || !watch('fullName')))
                 }
               >
-                {currentStep === 4 ? 'Submit Application' : 'Next'}
+                {currentStep === 5 ? 'Submit Application' : 'Next'}
                 <ArrowRight className="w-4 h-4 ml-2" />
               </Button>
             </div>

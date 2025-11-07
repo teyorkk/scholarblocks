@@ -1,10 +1,22 @@
 'use client'
 
 import { motion } from "framer-motion"
+import { useState } from "react"
 import { AdminSidebar } from "@/components/admin-sidebar"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { 
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
 import { 
   Users, 
   Coins, 
@@ -15,7 +27,8 @@ import {
   ArrowDown,
   Calendar,
   Shield,
-  Award
+  Award,
+  Settings
 } from "lucide-react"
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts"
 import { mockChartData, mockApplicants } from "@/lib/mock-data"
@@ -66,6 +79,21 @@ const pieData = [
 ]
 
 export default function AdminDashboard() {
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [startDate, setStartDate] = useState('')
+  const [endDate, setEndDate] = useState('')
+  const [isLoading, setIsLoading] = useState(false)
+
+  const handleSavePeriod = async () => {
+    setIsLoading(true)
+    
+    // Simulate API call
+    setTimeout(() => {
+      setIsModalOpen(false)
+      setIsLoading(false)
+      // You could add a toast notification here
+    }, 1500)
+  }
   return (
     <div className="min-h-screen bg-gray-50">
       <AdminSidebar />
@@ -93,6 +121,53 @@ export default function AdminDashboard() {
                     <Plus className="w-4 h-4 mr-2" />
                     Add Budget
                   </Button>
+                  <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+                    <DialogTrigger asChild>
+                      <Button variant="outline" className="border-white text-red-600 hover:bg-gray-100">
+                        <Settings className="w-4 h-4 mr-2" />
+                        Set Application Period
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="sm:max-w-[425px]">
+                      <DialogHeader>
+                        <DialogTitle>Set Application Period</DialogTitle>
+                        <DialogDescription>
+                          Define the start and end dates for the scholarship application period.
+                        </DialogDescription>
+                      </DialogHeader>
+                      <div className="grid gap-4 py-4">
+                        <div className="grid grid-cols-4 items-center gap-4">
+                          <Label htmlFor="startDate" className="text-right">
+                            Start Date
+                          </Label>
+                          <Input
+                            id="startDate"
+                            type="date"
+                            value={startDate}
+                            onChange={(e) => setStartDate(e.target.value)}
+                            className="col-span-3"
+                          />
+                        </div>
+                        <div className="grid grid-cols-4 items-center gap-4">
+                          <Label htmlFor="endDate" className="text-right">
+                            End Date
+                          </Label>
+                          <Input
+                            id="endDate"
+                            type="date"
+                            value={endDate}
+                            onChange={(e) => setEndDate(e.target.value)}
+                            className="col-span-3"
+                          />
+                        </div>
+                      </div>
+                      <DialogFooter>
+                        <Button type="submit" onClick={handleSavePeriod} disabled={isLoading}>
+                          {isLoading ? 'Saving...' : 'Save Period'}
+                        </Button>
+                      </DialogFooter>
+                    </DialogContent>
+                  </Dialog>
                   <Button variant="outline" className="border-white text-red-600 hover:bg-gray-100">
                     <FileText className="w-4 h-4 mr-2" />
                     Generate Report
