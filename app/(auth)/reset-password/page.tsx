@@ -3,7 +3,8 @@
 import { motion } from "framer-motion"
 import { useState } from "react"
 import Link from "next/link"
-import { Shield, Eye, EyeOff, ArrowLeft, Lock, CheckCircle } from "lucide-react"
+import NextImage from "next/image"
+import { Eye, EyeOff, ArrowLeft, Lock, CheckCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -132,8 +133,14 @@ export default function ResetPasswordPage() {
         <Card className="shadow-lg">
           <CardHeader className="text-center pb-4">
             <div className="flex justify-center mb-4">
-              <div className="w-12 h-12 bg-orange-500 rounded-xl flex items-center justify-center">
-                <Shield className="w-7 h-7 text-white" />
+              <div className="relative w-12 h-12 rounded-xl overflow-hidden">
+                <NextImage
+                  src="/scholarblock.svg"
+                  alt="ScholarBlock Logo"
+                  fill
+                  className="object-contain"
+                  priority
+                />
               </div>
             </div>
             <CardTitle className="text-2xl font-bold text-gray-900">

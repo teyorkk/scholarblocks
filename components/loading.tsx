@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Shield } from "lucide-react";
+import NextImage from "next/image";
 
 export function Loading() {
   return (
@@ -19,8 +19,14 @@ export function Loading() {
           }}
           className="flex justify-center mb-4"
         >
-          <div className="w-20 h-20 bg-orange-500 rounded-2xl flex items-center justify-center shadow-lg">
-            <Shield className="w-12 h-12 text-white" />
+          <div className="relative w-20 h-20 rounded-2xl overflow-hidden shadow-lg">
+            <NextImage
+              src="/scholarblock.svg"
+              alt="ScholarBlock Logo"
+              fill
+              className="object-contain"
+              priority
+            />
           </div>
         </motion.div>
 
@@ -29,9 +35,9 @@ export function Loading() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.2 }}
-          className="text-gray-600 font-medium"
+          className="text-gray-600 text-2xl font-medium"
         >
-          Loading...
+          Loading ScholarBlock...
         </motion.p>
       </div>
     </div>

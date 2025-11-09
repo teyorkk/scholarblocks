@@ -1,65 +1,64 @@
-'use client'
+"use client";
 
-import { motion } from "framer-motion"
-import { useState } from "react"
-import React from "react"
-import Link from "next/link"
-import { usePathname } from "next/navigation"
-import { 
-  Home, 
-  FileText, 
-  History, 
-  Settings, 
-  Menu, 
-  X, 
-  Shield, 
+import { motion } from "framer-motion";
+import { useState, useEffect } from "react";
+import Link from "next/link";
+import NextImage from "next/image";
+import { usePathname } from "next/navigation";
+import {
+  Home,
+  FileText,
+  History,
+  Settings,
+  Menu,
+  X,
   LogOut,
   ChevronLeft,
-  ChevronRight
-} from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { useSession } from "./session-provider"
-import { getSupabaseBrowserClient } from "@/lib/supabase/client"
-import { useMobile } from "@/hooks/use-mobile"
+  ChevronRight,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useSession } from "./session-provider";
+import { getSupabaseBrowserClient } from "@/lib/supabase/client";
+import { useMobile } from "@/hooks/use-mobile";
 
 const navigation = [
-  { name: 'Dashboard', href: '/user-dashboard', icon: Home },
-  { name: 'Application', href: '/application', icon: FileText },
-  { name: 'History', href: '/history', icon: History },
-  { name: 'Settings', href: '/user-settings', icon: Settings },
-]
+  { name: "Dashboard", href: "/user-dashboard", icon: Home },
+  { name: "Application", href: "/application", icon: FileText },
+  { name: "History", href: "/history", icon: History },
+  { name: "Settings", href: "/user-settings", icon: Settings },
+];
 
-export function UserSidebar() {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false)
+export function UserSidebar(): React.JSX.Element {
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(() => {
-    if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('user-sidebar-collapsed')
-      return saved === 'true'
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("user-sidebar-collapsed");
+      return saved === "true";
     }
-    return false
-  })
-  const pathname = usePathname()
-  const { user } = useSession()
-  const isMobile = useMobile()
+    return false;
+  });
+  const pathname = usePathname();
+  const { user } = useSession();
+  const isMobile = useMobile();
 
   // Save collapse state to localStorage
-  React.useEffect(() => {
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('user-sidebar-collapsed', isCollapsed.toString())
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      localStorage.setItem("user-sidebar-collapsed", isCollapsed.toString());
     }
-  }, [isCollapsed])
+  }, [isCollapsed]);
 
-  const handleLogout = async () => {
+  const handleLogout = async (): Promise<void> => {
     try {
-      const supabase = getSupabaseBrowserClient()
-      await supabase.auth.signOut()
+      const supabase = getSupabaseBrowserClient();
+      await supabase.auth.signOut();
     } catch {
       // ignore
     } finally {
-      window.location.href = '/login'
+      window.location.href = "/login";
     }
-  }
+  };
 
   // Mobile bottom navigation
   if (isMobile) {
@@ -85,7 +84,14 @@ export function UserSidebar() {
           <div className="p-4 border-b">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-2">
-                <Shield className="w-6 h-6 text-orange-500" />
+                <div className="relative w-6 h-6 rounded overflow-hidden">
+                  <NextImage
+                    src="/scholarblock.svg"
+                    alt="ScholarBlock Logo"
+                    fill
+                    className="object-contain"
+                  />
+                </div>
                 <span className="font-bold text-lg">ScholarBlock</span>
               </div>
               <Button
@@ -103,11 +109,16 @@ export function UserSidebar() {
               <Avatar>
                 <AvatarImage src="" />
                 <AvatarFallback className="bg-orange-100 text-orange-600">
-                  {(user?.user_metadata?.name as string)?.charAt(0) || user?.email?.charAt(0) || 'U'}
+                  {(user?.user_metadata?.name as string)?.charAt(0) ||
+                    user?.email?.charAt(0) ||
+                    "U"}
                 </AvatarFallback>
               </Avatar>
               <div>
-                <p className="font-medium text-gray-900">{(user?.user_metadata?.name as string) || user?.email?.split('@')[0]}</p>
+                <p className="font-medium text-gray-900">
+                  {(user?.user_metadata?.name as string) ||
+                    user?.email?.split("@")[0]}
+                </p>
                 <p className="text-sm text-gray-500">{user?.email}</p>
               </div>
             </div>
@@ -119,8 +130,8 @@ export function UserSidebar() {
                   href={item.href}
                   className={`flex items-center space-x-3 px-3 py-2 rounded-lg transition-colors ${
                     pathname === item.href
-                      ? 'bg-orange-50 text-orange-600'
-                      : 'text-gray-600 hover:bg-gray-50'
+                      ? "bg-orange-50 text-orange-600"
+                      : "text-gray-600 hover:bg-gray-50"
                   }`}
                   onClick={() => setIsSidebarOpen(false)}
                 >
@@ -154,14 +165,21 @@ export function UserSidebar() {
               <Menu className="w-5 h-5" />
             </Button>
             <div className="flex items-center space-x-2">
-              <Shield className="w-5 h-5 text-orange-500" />
+              <div className="relative w-5 h-5 rounded overflow-hidden">
+                <NextImage
+                  src="/scholarblock.svg"
+                  alt="ScholarBlock Logo"
+                  fill
+                  className="object-contain"
+                />
+              </div>
               <span className="font-bold">ScholarBlock</span>
             </div>
             <div className="w-8 h-8"></div>
           </div>
         </header>
       </>
-    )
+    );
   }
 
   // Desktop Sidebar
@@ -178,15 +196,25 @@ export function UserSidebar() {
         <div className="p-6 border-b flex items-center justify-between">
           {!isCollapsed && (
             <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-orange-500 rounded-lg flex items-center justify-center">
-                <Shield className="w-6 h-6 text-white" />
+              <div className="relative w-10 h-10 rounded-lg overflow-hidden">
+                <NextImage
+                  src="/scholarblock.svg"
+                  alt="ScholarBlock Logo"
+                  fill
+                  className="object-contain"
+                />
               </div>
               <span className="font-bold text-xl">ScholarBlock</span>
             </div>
           )}
           {isCollapsed && (
-            <div className="w-10 h-10 bg-orange-500 rounded-lg flex items-center justify-center mx-auto">
-              <Shield className="w-6 h-6 text-white" />
+            <div className="relative w-10 h-10 rounded-lg overflow-hidden mx-auto">
+              <NextImage
+                src="/scholarblock.svg"
+                alt="ScholarBlock Logo"
+                fill
+                className="object-contain"
+              />
             </div>
           )}
         </div>
@@ -212,22 +240,29 @@ export function UserSidebar() {
               <Avatar>
                 <AvatarImage src="" />
                 <AvatarFallback className="bg-orange-100 text-orange-600">
-                  {(user?.user_metadata?.name as string)?.charAt(0) || user?.email?.charAt(0) || 'U'}
+                  {(user?.user_metadata?.name as string)?.charAt(0) ||
+                    user?.email?.charAt(0) ||
+                    "U"}
                 </AvatarFallback>
               </Avatar>
               <div className="overflow-hidden">
-                <p className="font-medium text-gray-900 truncate">{(user?.user_metadata?.name as string) || user?.email?.split('@')[0]}</p>
+                <p className="font-medium text-gray-900 truncate">
+                  {(user?.user_metadata?.name as string) ||
+                    user?.email?.split("@")[0]}
+                </p>
                 <p className="text-sm text-gray-500 truncate">{user?.email}</p>
               </div>
             </div>
           )}
-          
+
           {isCollapsed && (
             <div className="flex justify-center mb-6">
               <Avatar>
                 <AvatarImage src="" />
                 <AvatarFallback className="bg-orange-100 text-orange-600">
-                  {(user?.user_metadata?.name as string)?.charAt(0) || user?.email?.charAt(0) || 'U'}
+                  {(user?.user_metadata?.name as string)?.charAt(0) ||
+                    user?.email?.charAt(0) ||
+                    "U"}
                 </AvatarFallback>
               </Avatar>
             </div>
@@ -239,15 +274,19 @@ export function UserSidebar() {
               <Link
                 key={item.name}
                 href={item.href}
-                className={`flex items-center ${isCollapsed ? 'justify-center' : 'space-x-3'} px-3 py-2 rounded-lg transition-colors ${
+                className={`flex items-center ${
+                  isCollapsed ? "justify-center" : "space-x-3"
+                } px-3 py-2 rounded-lg transition-colors ${
                   pathname === item.href
-                    ? 'bg-orange-50 text-orange-600'
-                    : 'text-gray-600 hover:bg-gray-50'
+                    ? "bg-orange-50 text-orange-600"
+                    : "text-gray-600 hover:bg-gray-50"
                 }`}
-                title={isCollapsed ? item.name : ''}
+                title={isCollapsed ? item.name : ""}
               >
                 <item.icon className="w-5 h-5" />
-                {!isCollapsed && <span className="font-medium">{item.name}</span>}
+                {!isCollapsed && (
+                  <span className="font-medium">{item.name}</span>
+                )}
               </Link>
             ))}
           </nav>
@@ -256,9 +295,11 @@ export function UserSidebar() {
           <div className="mt-6 pt-6 border-t">
             <Button
               variant="ghost"
-              className={`w-full ${isCollapsed ? 'justify-center px-2' : 'justify-start'} text-red-600 hover:text-red-700 hover:bg-red-50`}
+              className={`w-full ${
+                isCollapsed ? "justify-center px-2" : "justify-start"
+              } text-red-600 hover:text-red-700 hover:bg-red-50`}
               onClick={handleLogout}
-              title={isCollapsed ? 'Logout' : ''}
+              title={isCollapsed ? "Logout" : ""}
             >
               <LogOut className="w-4 h-4" />
               {!isCollapsed && <span className="ml-2">Logout</span>}
@@ -276,10 +317,11 @@ export function UserSidebar() {
       >
         <div className="flex items-center justify-between">
           <h1 className="text-2xl font-bold text-gray-900">
-            {navigation.find(item => item.href === pathname)?.name || 'Dashboard'}
+            {navigation.find((item) => item.href === pathname)?.name ||
+              "Dashboard"}
           </h1>
         </div>
       </motion.header>
     </>
-  )
+  );
 }
