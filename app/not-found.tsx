@@ -2,7 +2,8 @@
 
 import { motion } from "framer-motion";
 import Link from "next/link";
-import { Shield, Home, ArrowLeft } from "lucide-react";
+import NextImage from "next/image";
+import { Home, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export default function NotFound() {
@@ -21,8 +22,14 @@ export default function NotFound() {
           transition={{ duration: 0.5, type: "spring" }}
           className="flex justify-center mb-8"
         >
-          <div className="w-24 h-24 bg-orange-500 rounded-2xl flex items-center justify-center shadow-lg">
-            <Shield className="w-14 h-14 text-white" />
+          <div className="relative w-24 h-24 rounded-2xl overflow-hidden shadow-lg">
+            <NextImage
+              src="/scholarblock.svg"
+              alt="ScholarBlock Logo"
+              fill
+              className="object-contain"
+              priority
+            />
           </div>
         </motion.div>
 

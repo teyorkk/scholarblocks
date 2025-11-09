@@ -1,47 +1,62 @@
-'use client'
+"use client";
 
-import { motion } from "framer-motion"
-import { useState } from "react"
-import { UserSidebar } from "@/components/user-sidebar"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Checkbox } from "@/components/ui/checkbox"
-import { Progress } from "@/components/ui/progress"
-import { 
-  Upload, 
-  Camera, 
-  FileText, 
-  User, 
-  ArrowRight, 
-  ArrowLeft, 
+import { motion } from "framer-motion";
+import { useState } from "react";
+import { UserSidebar } from "@/components/user-sidebar";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Progress } from "@/components/ui/progress";
+import {
+  Upload,
+  Camera,
+  FileText,
+  User,
+  ArrowRight,
+  ArrowLeft,
   CheckCircle,
-  Zap
-} from "lucide-react"
-import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { applicationSchema, type ApplicationFormData } from "@/lib/validations"
-import { toast } from "sonner"
-import { useDropzone } from "react-dropzone"
+  Zap,
+} from "lucide-react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { applicationSchema, type ApplicationFormData } from "@/lib/validations";
+import { toast } from "sonner";
+import { useDropzone } from "react-dropzone";
 
 const steps = [
-  { id: 1, name: 'Application Type', icon: FileText },
-  { id: 2, name: 'Upload ID', icon: Upload },
-  { id: 3, name: 'Face Scan', icon: Camera },
-  { id: 4, name: 'Personal Info', icon: User },
-  { id: 5, name: 'Upload Documents', icon: Upload },
-]
+  { id: 1, name: "Application Type", icon: FileText },
+  { id: 2, name: "Upload ID", icon: Upload },
+  { id: 3, name: "Face Scan", icon: Camera },
+  { id: 4, name: "Personal Info", icon: User },
+  { id: 5, name: "Upload Documents", icon: Upload },
+];
 
 export default function ApplicationPage() {
-  const [currentStep, setCurrentStep] = useState(1)
-  const [isSubmitted, setIsSubmitted] = useState(false)
-  const [uploadedFile, setUploadedFile] = useState<File | null>(null)
-  const [isScanning, setIsScanning] = useState(false)
-  const [certificateOfGrades, setCertificateOfGrades] = useState<File | null>(null)
-  const [certificateOfRegistration, setCertificateOfRegistration] = useState<File | null>(null)
+  const [currentStep, setCurrentStep] = useState(1);
+  const [isSubmitted, setIsSubmitted] = useState(false);
+  const [uploadedFile, setUploadedFile] = useState<File | null>(null);
+  const [isScanning, setIsScanning] = useState(false);
+  const [certificateOfGrades, setCertificateOfGrades] = useState<File | null>(
+    null
+  );
+  const [certificateOfRegistration, setCertificateOfRegistration] =
+    useState<File | null>(null);
 
   const {
     register,
@@ -51,80 +66,88 @@ export default function ApplicationPage() {
     watch,
   } = useForm<ApplicationFormData>({
     resolver: zodResolver(applicationSchema),
-  })
+  });
 
   const onDrop = (acceptedFiles: File[]) => {
     if (acceptedFiles.length > 0) {
-      setUploadedFile(acceptedFiles[0])
-      setValue('idDocument', acceptedFiles[0])
+      setUploadedFile(acceptedFiles[0]);
+      setValue("idDocument", acceptedFiles[0]);
     }
-  }
+  };
 
   const onDropGrades = (acceptedFiles: File[]) => {
     if (acceptedFiles.length > 0) {
-      setCertificateOfGrades(acceptedFiles[0])
-      setValue('certificateOfGrades', acceptedFiles[0])
+      setCertificateOfGrades(acceptedFiles[0]);
+      setValue("certificateOfGrades", acceptedFiles[0]);
     }
-  }
+  };
 
   const onDropRegistration = (acceptedFiles: File[]) => {
     if (acceptedFiles.length > 0) {
-      setCertificateOfRegistration(acceptedFiles[0])
-      setValue('certificateOfRegistration', acceptedFiles[0])
+      setCertificateOfRegistration(acceptedFiles[0]);
+      setValue("certificateOfRegistration", acceptedFiles[0]);
     }
-  }
+  };
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
     accept: {
-      'image/*': ['.jpeg', '.jpg', '.png'],
-      'application/pdf': ['.pdf']
+      "image/*": [".jpeg", ".jpg", ".png"],
+      "application/pdf": [".pdf"],
     },
     maxFiles: 1,
-  })
+  });
 
-  const { getRootProps: getRootPropsGrades, getInputProps: getInputPropsGrades, isDragActive: isDragActiveGrades } = useDropzone({
+  const {
+    getRootProps: getRootPropsGrades,
+    getInputProps: getInputPropsGrades,
+    isDragActive: isDragActiveGrades,
+  } = useDropzone({
     onDrop: onDropGrades,
     accept: {
-      'image/*': ['.jpeg', '.jpg', '.png'],
-      'application/pdf': ['.pdf']
+      "image/*": [".jpeg", ".jpg", ".png"],
+      "application/pdf": [".pdf"],
     },
     maxFiles: 1,
-  })
+  });
 
-  const { getRootProps: getRootPropsRegistration, getInputProps: getInputPropsRegistration, isDragActive: isDragActiveRegistration } = useDropzone({
+  const {
+    getRootProps: getRootPropsRegistration,
+    getInputProps: getInputPropsRegistration,
+    isDragActive: isDragActiveRegistration,
+  } = useDropzone({
     onDrop: onDropRegistration,
     accept: {
-      'image/*': ['.jpeg', '.jpg', '.png'],
-      'application/pdf': ['.pdf']
+      "image/*": [".jpeg", ".jpg", ".png"],
+      "application/pdf": [".pdf"],
     },
     maxFiles: 1,
-  })
+  });
 
   const onSubmit = () => {
-    setIsSubmitted(true)
-    toast.success('Application submitted successfully!')
-  }
+    setIsSubmitted(true);
+    toast.success("Application submitted successfully!");
+  };
 
   const nextStep = () => {
     if (currentStep < steps.length) {
-      setCurrentStep(currentStep + 1)
+      setCurrentStep(currentStep + 1);
     }
-  }
+  };
 
   const prevStep = () => {
     if (currentStep > 1) {
-      setCurrentStep(currentStep - 1)
+      setCurrentStep(currentStep - 1);
     }
-  }
+  };
 
   const handleFaceScan = () => {
-    setIsScanning(true)
+    setIsScanning(true);
     setTimeout(() => {
-      setIsScanning(false)
-      nextStep()
-    }, 2000)
-  }
+      setIsScanning(false);
+      nextStep();
+    }, 2000);
+  };
 
   if (isSubmitted) {
     return (
@@ -149,22 +172,30 @@ export default function ApplicationPage() {
                     Application Submitted!
                   </CardTitle>
                   <CardDescription>
-                    Your scholarship application has been successfully submitted and is now under review.
+                    Your scholarship application has been successfully submitted
+                    and is now under review.
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="bg-green-50 p-4 rounded-lg">
                     <p className="text-sm text-green-700">
-                      <strong>Application ID:</strong> SCH-{Date.now()}<br />
-                      <strong>Status:</strong> Under Review<br />
+                      <strong>Application ID:</strong> SCH-{Date.now()}
+                      <br />
+                      <strong>Status:</strong> Under Review
+                      <br />
                       <strong>Estimated Response:</strong> 5-7 business days
                     </p>
                   </div>
                   <div className="flex gap-4 justify-center">
-                    <Button onClick={() => window.location.href = '/user/dashboard'}>
+                    <Button
+                      onClick={() => (window.location.href = "/user/dashboard")}
+                    >
                       Back to Dashboard
                     </Button>
-                    <Button variant="outline" onClick={() => window.location.href = '/user/history'}>
+                    <Button
+                      variant="outline"
+                      onClick={() => (window.location.href = "/user/history")}
+                    >
                       View Application History
                     </Button>
                   </div>
@@ -174,13 +205,13 @@ export default function ApplicationPage() {
           </div>
         </div>
       </div>
-    )
+    );
   }
 
   return (
     <div className="min-h-screen bg-gray-50">
       <UserSidebar />
-      
+
       {/* Main Content */}
       <div className="md:ml-64 md:pt-20 pb-16 md:pb-0">
         <div className="p-4 md:p-6">
@@ -200,18 +231,27 @@ export default function ApplicationPage() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  <Progress value={(currentStep / steps.length) * 100} className="h-2" />
+                  <Progress
+                    value={(currentStep / steps.length) * 100}
+                    className="h-2"
+                  />
                   <div className="grid grid-cols-5 gap-2">
                     {steps.map((step) => (
                       <div
                         key={step.id}
                         className={`text-center ${
-                          currentStep >= step.id ? 'text-orange-600' : 'text-gray-400'
+                          currentStep >= step.id
+                            ? "text-orange-600"
+                            : "text-gray-400"
                         }`}
                       >
-                        <div className={`w-8 h-8 mx-auto mb-2 rounded-full flex items-center justify-center ${
-                          currentStep >= step.id ? 'bg-orange-100' : 'bg-gray-100'
-                        }`}>
+                        <div
+                          className={`w-8 h-8 mx-auto mb-2 rounded-full flex items-center justify-center ${
+                            currentStep >= step.id
+                              ? "bg-orange-100"
+                              : "bg-gray-100"
+                          }`}
+                        >
                           <step.icon className="w-4 h-4" />
                         </div>
                         <p className="text-xs font-medium">{step.name}</p>
@@ -242,11 +282,13 @@ export default function ApplicationPage() {
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <Card 
+                      <Card
                         className={`cursor-pointer transition-all ${
-                          watch('type') === 'new' ? 'ring-2 ring-orange-500 bg-orange-50' : 'hover:shadow-md'
+                          watch("type") === "new"
+                            ? "ring-2 ring-orange-500 bg-orange-50"
+                            : "hover:shadow-md"
                         }`}
-                        onClick={() => setValue('type', 'new')}
+                        onClick={() => setValue("type", "new")}
                       >
                         <CardContent className="p-4">
                           <div className="flex items-center space-x-3">
@@ -255,17 +297,21 @@ export default function ApplicationPage() {
                             </div>
                             <div>
                               <h3 className="font-medium">New Application</h3>
-                              <p className="text-sm text-gray-600">First-time scholarship applicant</p>
+                              <p className="text-sm text-gray-600">
+                                First-time scholarship applicant
+                              </p>
                             </div>
                           </div>
                         </CardContent>
                       </Card>
-                      
-                      <Card 
+
+                      <Card
                         className={`cursor-pointer transition-all ${
-                          watch('type') === 'renewal' ? 'ring-2 ring-orange-500 bg-orange-50' : 'hover:shadow-md'
+                          watch("type") === "renewal"
+                            ? "ring-2 ring-orange-500 bg-orange-50"
+                            : "hover:shadow-md"
                         }`}
-                        onClick={() => setValue('type', 'renewal')}
+                        onClick={() => setValue("type", "renewal")}
                       >
                         <CardContent className="p-4">
                           <div className="flex items-center space-x-3">
@@ -274,14 +320,18 @@ export default function ApplicationPage() {
                             </div>
                             <div>
                               <h3 className="font-medium">Renewal</h3>
-                              <p className="text-sm text-gray-600">Continuing your scholarship</p>
+                              <p className="text-sm text-gray-600">
+                                Continuing your scholarship
+                              </p>
                             </div>
                           </div>
                         </CardContent>
                       </Card>
                     </div>
                     {errors.type && (
-                      <p className="text-sm text-red-500">{errors.type.message}</p>
+                      <p className="text-sm text-red-500">
+                        {errors.type.message}
+                      </p>
                     )}
                   </CardContent>
                 </Card>
@@ -295,34 +345,46 @@ export default function ApplicationPage() {
                       Upload ID Document
                     </CardTitle>
                     <CardDescription>
-                      Upload a valid government ID (PDF, JPG, or PNG)
+                      Student or Valid ID (PDF, JPG, or PNG)
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
                     <div
                       {...getRootProps()}
                       className={`border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors ${
-                        isDragActive ? 'border-orange-500 bg-orange-50' : 'border-gray-300 hover:border-gray-400'
+                        isDragActive
+                          ? "border-orange-500 bg-orange-50"
+                          : "border-gray-300 hover:border-gray-400"
                       }`}
                     >
                       <input {...getInputProps()} />
                       <Upload className="w-12 h-12 mx-auto mb-4 text-gray-400" />
                       {uploadedFile ? (
                         <div>
-                          <p className="font-medium text-green-600">{uploadedFile.name}</p>
-                          <p className="text-sm text-gray-500">File uploaded successfully</p>
+                          <p className="font-medium text-green-600">
+                            {uploadedFile.name}
+                          </p>
+                          <p className="text-sm text-gray-500">
+                            File uploaded successfully
+                          </p>
                         </div>
                       ) : (
                         <div>
                           <p className="font-medium text-gray-900">
-                            {isDragActive ? 'Drop the file here' : 'Click to upload or drag and drop'}
+                            {isDragActive
+                              ? "Drop the file here"
+                              : "Click to upload or drag and drop"}
                           </p>
-                          <p className="text-sm text-gray-500">PDF, JPG, or PNG (max. 5MB)</p>
+                          <p className="text-sm text-gray-500">
+                            PDF, JPG, or PNG (max. 5MB)
+                          </p>
                         </div>
                       )}
                     </div>
                     {errors.idDocument && (
-                      <p className="text-sm text-red-500 mt-2">Please upload a valid ID document</p>
+                      <p className="text-sm text-red-500 mt-2">
+                        Please upload a valid ID document
+                      </p>
                     )}
                   </CardContent>
                 </Card>
@@ -345,7 +407,11 @@ export default function ApplicationPage() {
                         {isScanning ? (
                           <motion.div
                             animate={{ rotate: 360 }}
-                            transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+                            transition={{
+                              duration: 2,
+                              repeat: Infinity,
+                              ease: "linear",
+                            }}
                             className="w-48 h-48 border-4 border-orange-500 border-t-transparent rounded-full"
                           />
                         ) : (
@@ -365,10 +431,11 @@ export default function ApplicationPage() {
                       )}
                     </div>
                     <p className="text-sm text-gray-600 mb-4">
-                      Ensure good lighting and keep your face centered in the frame
+                      Ensure good lighting and keep your face centered in the
+                      frame
                     </p>
                     <Button onClick={handleFaceScan} disabled={isScanning}>
-                      {isScanning ? 'Scanning...' : 'Start Face Scan'}
+                      {isScanning ? "Scanning..." : "Start Face Scan"}
                     </Button>
                   </CardContent>
                 </Card>
@@ -396,10 +463,12 @@ export default function ApplicationPage() {
                             placeholder="Enter your full name"
                           />
                           {errors.fullName && (
-                            <p className="text-sm text-red-500">{errors.fullName.message}</p>
+                            <p className="text-sm text-red-500">
+                              {errors.fullName.message}
+                            </p>
                           )}
                         </div>
-                        
+
                         <div className="space-y-2">
                           <Label htmlFor="age">Age</Label>
                           <Input
@@ -409,7 +478,9 @@ export default function ApplicationPage() {
                             placeholder="Enter your age"
                           />
                           {errors.age && (
-                            <p className="text-sm text-red-500">{errors.age.message}</p>
+                            <p className="text-sm text-red-500">
+                              {errors.age.message}
+                            </p>
                           )}
                         </div>
                       </div>
@@ -422,7 +493,9 @@ export default function ApplicationPage() {
                           placeholder="Enter your complete address"
                         />
                         {errors.address && (
-                          <p className="text-sm text-red-500">{errors.address.message}</p>
+                          <p className="text-sm text-red-500">
+                            {errors.address.message}
+                          </p>
                         )}
                       </div>
 
@@ -435,10 +508,12 @@ export default function ApplicationPage() {
                             placeholder="Enter your school name"
                           />
                           {errors.school && (
-                            <p className="text-sm text-red-500">{errors.school.message}</p>
+                            <p className="text-sm text-red-500">
+                              {errors.school.message}
+                            </p>
                           )}
                         </div>
-                        
+
                         <div className="space-y-2">
                           <Label htmlFor="course">Course</Label>
                           <Input
@@ -447,7 +522,9 @@ export default function ApplicationPage() {
                             placeholder="Enter your course"
                           />
                           {errors.course && (
-                            <p className="text-sm text-red-500">{errors.course.message}</p>
+                            <p className="text-sm text-red-500">
+                              {errors.course.message}
+                            </p>
                           )}
                         </div>
                       </div>
@@ -455,7 +532,11 @@ export default function ApplicationPage() {
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="space-y-2">
                           <Label htmlFor="yearLevel">Year Level</Label>
-                          <Select onValueChange={(value) => setValue('yearLevel', value)}>
+                          <Select
+                            onValueChange={(value) =>
+                              setValue("yearLevel", value)
+                            }
+                          >
                             <SelectTrigger>
                               <SelectValue placeholder="Select year level" />
                             </SelectTrigger>
@@ -468,10 +549,12 @@ export default function ApplicationPage() {
                             </SelectContent>
                           </Select>
                           {errors.yearLevel && (
-                            <p className="text-sm text-red-500">{errors.yearLevel.message}</p>
+                            <p className="text-sm text-red-500">
+                              {errors.yearLevel.message}
+                            </p>
                           )}
                         </div>
-                        
+
                         <div className="space-y-2">
                           <Label htmlFor="gwa">GWA</Label>
                           <Input
@@ -480,7 +563,9 @@ export default function ApplicationPage() {
                             placeholder="Enter your GWA"
                           />
                           {errors.gwa && (
-                            <p className="text-sm text-red-500">{errors.gwa.message}</p>
+                            <p className="text-sm text-red-500">
+                              {errors.gwa.message}
+                            </p>
                           )}
                         </div>
                       </div>
@@ -488,7 +573,8 @@ export default function ApplicationPage() {
                       <div className="flex items-center space-x-2">
                         <Checkbox id="terms" />
                         <Label htmlFor="terms" className="text-sm">
-                          I certify that all information provided is true and accurate
+                          I certify that all information provided is true and
+                          accurate
                         </Label>
                       </div>
                     </form>
@@ -504,75 +590,106 @@ export default function ApplicationPage() {
                       Upload Required Documents
                     </CardTitle>
                     <CardDescription>
-                      Upload your certificate of grades and certificate of registration
+                      Upload your certificate of grades and certificate of
+                      registration
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-6">
                     {/* Certificate of Grades Upload */}
                     <div>
-                      <Label className="text-sm font-medium mb-2 block">Certificate of Grades</Label>
+                      <Label className="text-sm font-medium mb-2 block">
+                        Certificate of Grades
+                      </Label>
                       <div
                         {...getRootPropsGrades()}
                         className={`border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-colors ${
-                          isDragActiveGrades ? 'border-orange-500 bg-orange-50' : 'border-gray-300 hover:border-gray-400'
+                          isDragActiveGrades
+                            ? "border-orange-500 bg-orange-50"
+                            : "border-gray-300 hover:border-gray-400"
                         }`}
                       >
                         <input {...getInputPropsGrades()} />
                         <Upload className="w-10 h-10 mx-auto mb-3 text-gray-400" />
                         {certificateOfGrades ? (
                           <div>
-                            <p className="font-medium text-green-600">{certificateOfGrades.name}</p>
-                            <p className="text-sm text-gray-500">File uploaded successfully</p>
+                            <p className="font-medium text-green-600">
+                              {certificateOfGrades.name}
+                            </p>
+                            <p className="text-sm text-gray-500">
+                              File uploaded successfully
+                            </p>
                           </div>
                         ) : (
                           <div>
                             <p className="font-medium text-gray-900">
-                              {isDragActiveGrades ? 'Drop the file here' : 'Click to upload or drag and drop'}
+                              {isDragActiveGrades
+                                ? "Drop the file here"
+                                : "Click to upload or drag and drop"}
                             </p>
-                            <p className="text-sm text-gray-500">PDF, JPG, or PNG (max. 5MB)</p>
+                            <p className="text-sm text-gray-500">
+                              PDF, JPG, or PNG (max. 5MB)
+                            </p>
                           </div>
                         )}
                       </div>
                       {errors.certificateOfGrades && (
-                        <p className="text-sm text-red-500 mt-2">{errors.certificateOfGrades.message}</p>
+                        <p className="text-sm text-red-500 mt-2">
+                          {errors.certificateOfGrades.message}
+                        </p>
                       )}
                     </div>
 
                     {/* Certificate of Registration Upload */}
                     <div>
-                      <Label className="text-sm font-medium mb-2 block">Certificate of Registration</Label>
+                      <Label className="text-sm font-medium mb-2 block">
+                        Certificate of Registration
+                      </Label>
                       <div
                         {...getRootPropsRegistration()}
                         className={`border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-colors ${
-                          isDragActiveRegistration ? 'border-orange-500 bg-orange-50' : 'border-gray-300 hover:border-gray-400'
+                          isDragActiveRegistration
+                            ? "border-orange-500 bg-orange-50"
+                            : "border-gray-300 hover:border-gray-400"
                         }`}
                       >
                         <input {...getInputPropsRegistration()} />
                         <Upload className="w-10 h-10 mx-auto mb-3 text-gray-400" />
                         {certificateOfRegistration ? (
                           <div>
-                            <p className="font-medium text-green-600">{certificateOfRegistration.name}</p>
-                            <p className="text-sm text-gray-500">File uploaded successfully</p>
+                            <p className="font-medium text-green-600">
+                              {certificateOfRegistration.name}
+                            </p>
+                            <p className="text-sm text-gray-500">
+                              File uploaded successfully
+                            </p>
                           </div>
                         ) : (
                           <div>
                             <p className="font-medium text-gray-900">
-                              {isDragActiveRegistration ? 'Drop the file here' : 'Click to upload or drag and drop'}
+                              {isDragActiveRegistration
+                                ? "Drop the file here"
+                                : "Click to upload or drag and drop"}
                             </p>
-                            <p className="text-sm text-gray-500">PDF, JPG, or PNG (max. 5MB)</p>
+                            <p className="text-sm text-gray-500">
+                              PDF, JPG, or PNG (max. 5MB)
+                            </p>
                           </div>
                         )}
                       </div>
                       {errors.certificateOfRegistration && (
-                        <p className="text-sm text-red-500 mt-2">{errors.certificateOfRegistration.message}</p>
+                        <p className="text-sm text-red-500 mt-2">
+                          {errors.certificateOfRegistration.message}
+                        </p>
                       )}
                     </div>
 
                     <div className="bg-blue-50 p-4 rounded-lg">
                       <p className="text-sm text-blue-700">
-                        <strong>Note:</strong> Please ensure that all documents are clear and readable. 
-                        The certificate of grades should show your academic performance for the latest semester, 
-                        and the certificate of registration should prove your current enrollment status.
+                        <strong>Note:</strong> Please ensure that all documents
+                        are clear and readable. The certificate of grades should
+                        show your academic performance for the latest semester,
+                        and the certificate of registration should prove your
+                        current enrollment status.
                       </p>
                     </div>
                   </CardContent>
@@ -590,16 +707,19 @@ export default function ApplicationPage() {
                 <ArrowLeft className="w-4 h-4 mr-2" />
                 Previous
               </Button>
-              
+
               <Button
                 onClick={currentStep === 5 ? handleSubmit(onSubmit) : nextStep}
                 disabled={
-                  (currentStep === 1 && !watch('type')) ||
+                  (currentStep === 1 && !watch("type")) ||
                   (currentStep === 2 && !uploadedFile) ||
-                  (currentStep === 5 && (!certificateOfGrades || !certificateOfRegistration || !watch('fullName')))
+                  (currentStep === 5 &&
+                    (!certificateOfGrades ||
+                      !certificateOfRegistration ||
+                      !watch("fullName")))
                 }
               >
-                {currentStep === 5 ? 'Submit Application' : 'Next'}
+                {currentStep === 5 ? "Submit Application" : "Next"}
                 <ArrowRight className="w-4 h-4 ml-2" />
               </Button>
             </div>
@@ -607,5 +727,5 @@ export default function ApplicationPage() {
         </div>
       </div>
     </div>
-  )
+  );
 }

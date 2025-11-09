@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { useState } from "react";
 import React from "react";
 import Link from "next/link";
+import NextImage from "next/image";
 import { usePathname } from "next/navigation";
 import {
   Home,
@@ -89,7 +90,14 @@ export function AdminSidebar() {
           <div className="p-4 border-b">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-2">
-                <Shield className="w-6 h-6 text-orange-500" />
+                <div className="relative w-6 h-6 rounded overflow-hidden">
+                  <NextImage
+                    src="/scholarblock.svg"
+                    alt="ScholarBlock Logo"
+                    fill
+                    className="object-contain"
+                  />
+                </div>
                 <span className="font-bold text-lg">ScholarBlock</span>
                 <Badge
                   variant="secondary"
@@ -169,7 +177,14 @@ export function AdminSidebar() {
               <Menu className="w-5 h-5" />
             </Button>
             <div className="flex items-center space-x-2">
-              <Shield className="w-5 h-5 text-orange-500" />
+              <div className="relative w-5 h-5 rounded overflow-hidden">
+                <NextImage
+                  src="/scholarblock.svg"
+                  alt="ScholarBlock Logo"
+                  fill
+                  className="object-contain"
+                />
+              </div>
               <span className="font-bold">ScholarBlock</span>
             </div>
             <div className="w-8 h-8"></div>
@@ -193,8 +208,13 @@ export function AdminSidebar() {
         <div className="p-6 border-b flex items-center justify-between">
           {!isCollapsed && (
             <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-orange-500 rounded-lg flex items-center justify-center">
-                <Shield className="w-6 h-6 text-white" />
+              <div className="relative w-10 h-10 rounded-lg overflow-hidden">
+                <NextImage
+                  src="/scholarblock.svg"
+                  alt="ScholarBlock Logo"
+                  fill
+                  className="object-contain"
+                />
               </div>
               <div className="flex-1">
                 <span className="font-bold text-xl">ScholarBlock</span>
@@ -208,8 +228,13 @@ export function AdminSidebar() {
             </div>
           )}
           {isCollapsed && (
-            <div className="w-10 h-10 bg-orange-500 rounded-lg flex items-center justify-center mx-auto">
-              <Shield className="w-6 h-6 text-white" />
+            <div className="relative w-10 h-10 rounded-lg overflow-hidden mx-auto">
+              <NextImage
+                src="/scholarblock.svg"
+                alt="ScholarBlock Logo"
+                fill
+                className="object-contain"
+              />
             </div>
           )}
         </div>

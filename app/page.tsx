@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/card";
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import Image from "next/image";
+import NextImage from "next/image";
 import { useRouter } from "next/navigation";
 import { useSession } from "@/components/session-provider";
 import { Loading } from "@/components/loading";
@@ -69,8 +69,14 @@ export default function Home() {
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
               <div className="flex items-center space-x-2">
-                <div className="w-8 h-8 bg-orange-500 rounded-lg flex items-center justify-center">
-                  <Shield className="w-5 h-5 text-white" />
+                <div className="relative w-8 h-8 rounded-lg overflow-hidden">
+                  <NextImage
+                    src="/scholarblock.svg"
+                    alt="ScholarBlock Logo"
+                    fill
+                    className="object-contain"
+                    priority
+                  />
                 </div>
                 <span className="font-bold text-xl text-gray-900">
                   ScholarBlock
@@ -223,11 +229,17 @@ export default function Home() {
             className="text-center max-w-4xl mx-auto"
           >
             <div className="flex justify-center items-center gap-4 mb-6">
-              <div className="w-20 h-20 bg-orange-500 rounded-2xl flex items-center justify-center">
-                <Shield className="w-12 h-12 text-white" />
+              <div className="relative w-20 h-20 rounded-2xl overflow-hidden">
+                <NextImage
+                  src="/scholarblock.svg"
+                  alt="ScholarBlock Logo"
+                  fill
+                  className="object-contain"
+                  priority
+                />
               </div>
               <div className="relative w-24 h-24">
-                <Image
+                <NextImage
                   src="/sk-logo.png"
                   alt="SK Logo"
                   fill
@@ -365,8 +377,13 @@ export default function Home() {
           <div className="flex flex-col md:flex-row justify-between items-center">
             <div className="flex items-center space-x-3 mb-4 md:mb-0">
               <div className="flex items-center space-x-2">
-                <div className="w-8 h-8 bg-orange-500 rounded-lg flex items-center justify-center">
-                  <Shield className="w-5 h-5 text-white" />
+                <div className="relative w-8 h-8 rounded-lg overflow-hidden">
+                  <NextImage
+                    src="/scholarblock.svg"
+                    alt="ScholarBlock Logo"
+                    fill
+                    className="object-contain"
+                  />
                 </div>
                 <span className="font-bold text-lg">ScholarBlock</span>
               </div>
