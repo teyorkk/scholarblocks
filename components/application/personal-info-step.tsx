@@ -49,7 +49,9 @@ export function PersonalInfoStep({
                 placeholder="Enter your full name"
               />
               {errors.fullName && (
-                <p className="text-sm text-red-500">{errors.fullName.message}</p>
+                <p className="text-sm text-red-500">
+                  {errors.fullName.message}
+                </p>
               )}
             </div>
 
@@ -108,9 +110,7 @@ export function PersonalInfoStep({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="yearLevel">Year Level</Label>
-              <Select
-                onValueChange={(value) => setValue("yearLevel", value)}
-              >
+              <Select onValueChange={(value) => setValue("yearLevel", value)}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select year level" />
                 </SelectTrigger>
@@ -153,4 +153,3 @@ export function PersonalInfoStep({
     </Card>
   );
 }
-
