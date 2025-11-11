@@ -154,8 +154,9 @@ export default function RegisterPage() {
     try {
       setIsVerifyingOTP(true);
       if (!pendingUserData) {
-        toast.error("No pending user data.");
-        return;
+        const errorMsg = "No pending user data.";
+        toast.error(errorMsg);
+        throw new Error(errorMsg);
       }
       const res = await fetch("/api/auth/verify-otp", {
         method: "POST",
@@ -168,8 +169,9 @@ export default function RegisterPage() {
       });
       const json = await res.json();
       if (!res.ok) {
-        toast.error(json.error || "Verification failed");
-        return;
+        const errorMsg = json.error || "Verification failed";
+        toast.error(errorMsg);
+        throw new Error(errorMsg);
       }
       toast.success("Registration verified! You can now sign in.");
       setShowOTPModal(false);
@@ -177,6 +179,7 @@ export default function RegisterPage() {
     } catch (e) {
       const error = e as Error;
       toast.error(error.message || "Unexpected error");
+      throw error;
     } finally {
       setIsVerifyingOTP(false);
     }
