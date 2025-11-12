@@ -113,14 +113,18 @@ export function ProfileCard({
         <div className="relative mx-auto">
           <Avatar className="w-24 h-24 mx-auto">
             <AvatarImage src={profilePicture || ""} />
-            <AvatarFallback className="bg-red-100 text-red-600 text-2xl">
+            <AvatarFallback
+              className={`${isAdmin ? "bg-red-100 text-red-600" : "bg-orange-100 text-orange-600"} text-2xl`}
+            >
               {getInitial()}
             </AvatarFallback>
           </Avatar>
           <label
-            className={`absolute bottom-0 right-0 bg-red-500 rounded-full p-2 cursor-pointer hover:bg-red-600 transition-colors ${
-              isUploading ? "opacity-50 cursor-not-allowed" : ""
-            }`}
+            className={`absolute bottom-0 right-0 rounded-full p-2 cursor-pointer transition-colors ${
+              isAdmin
+                ? "bg-red-500 hover:bg-red-600"
+                : "bg-orange-500 hover:bg-orange-600"
+            } ${isUploading ? "opacity-50 cursor-not-allowed" : ""}`}
           >
             <Camera className="w-4 h-4 text-white" />
             <input
