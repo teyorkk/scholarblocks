@@ -226,11 +226,17 @@ export function UserSidebar(): React.JSX.Element {
                     "U"}
                 </AvatarFallback>
               </Avatar>
-              <div>
-                <p className="font-medium text-gray-900">
+              <div className="min-w-0">
+                <p
+                  className="font-medium text-gray-900 truncate"
+                  title={userProfile?.name || user?.email?.split("@")[0]}
+                >
                   {userProfile?.name || user?.email?.split("@")[0]}
                 </p>
-                <p className="text-sm text-gray-500">
+                <p
+                  className="text-sm text-gray-500 truncate"
+                  title={userProfile?.email || user?.email || undefined}
+                >
                   {userProfile?.email || user?.email}
                 </p>
               </div>

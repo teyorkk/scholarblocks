@@ -34,7 +34,7 @@ export function ApplicationSuccess({
           </CardTitle>
           <CardDescription>
             Your scholarship application has been successfully submitted and is
-            now under review.
+            now pending.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -43,9 +43,8 @@ export function ApplicationSuccess({
               <strong>Application ID:</strong>{" "}
               {applicationId || `SCH-${Date.now()}`}
               <br />
-              <strong>Status:</strong> Under Review
+              <strong>Status:</strong> Pending
               <br />
-              <strong>Estimated Response:</strong> 5-7 business days
             </p>
           </div>
           <div className="flex gap-4 justify-center">
