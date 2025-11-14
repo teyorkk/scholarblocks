@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Settings } from "lucide-react";
+import { Settings, ToggleLeft, ToggleRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -14,20 +14,107 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { getSupabaseBrowserClient } from "@/lib/supabase/client";
+import { toast } from "sonner";
+
 export function ApplicationPeriodDialog(): React.JSX.Element {
   const [isOpen, setIsOpen] = useState(false);
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
+  const [isAccepting, setIsAccepting] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [budget, setBudget] = useState<string>("");
 
   const handleSave = async (): Promise<void> => {
+    if (!title.trim()) {
+      toast.error("Please enter a title for the application period");
+      return;
+    }
+
+    if (!startDate || !endDate) {
+      toast.error("Please select both start and end dates");
+      return;
+    }
+
+    if (new Date(startDate) >= new Date(endDate)) {
+      toast.error("End date must be after start date");
+      return;
+    }
+
+    if (!budget || parseFloat(budget) <= 0) {
+      toast.error("Please enter a valid budget amount");
+      return;
+    }
+
     setIsLoading(true);
-    // Simulate API call
-    setTimeout(() => {
+
+    try {
+      const supabase = getSupabaseBrowserClient();
+
+      // Create Budget first
+      const budgetId = crypto.randomUUID();
+      const budgetAmount = parseFloat(budget);
+
+      const { error: budgetError } = await supabase.from("Budget").insert({
+        id: budgetId,
+        totalAmount: budgetAmount,
+        remainingAmount: budgetAmount,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      });
+
+      if (budgetError) {
+        console.error("Budget creation error:", budgetError);
+        toast.error("Failed to create budget. Please try again.");
+        setIsLoading(false);
+        return;
+      }
+
+      // Create ApplicationPeriod with reference to Budget
+      const periodId = crypto.randomUUID();
+      const { error: periodError } = await supabase
+        .from("ApplicationPeriod")
+        .insert({
+          id: periodId,
+          title: title.trim(),
+          description: description.trim() || "Scholarship application period",
+          startDate: new Date(startDate).toISOString(),
+          endDate: new Date(endDate).toISOString(),
+          isOpen: isAccepting,
+          budgetId: budgetId,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        });
+
+      if (periodError) {
+        console.error("ApplicationPeriod creation error:", periodError);
+        // Rollback: delete the budget if period creation fails
+        await supabase.from("Budget").delete().eq("id", budgetId);
+        toast.error("Failed to create application period. Please try again.");
+        setIsLoading(false);
+        return;
+      }
+
+      toast.success("Application period and budget created successfully!");
       setIsOpen(false);
+      // Reset form
+      setTitle("");
+      setDescription("");
+      setStartDate("");
+      setEndDate("");
+      setBudget("");
+      setIsAccepting(false);
+
+      // Refresh the page to show updated data
+      window.location.reload();
+    } catch (error) {
+      console.error("Error creating application period:", error);
+      toast.error("An unexpected error occurred. Please try again.");
+    } finally {
       setIsLoading(false);
-    }, 1500);
+    }
   };
 
   return (
@@ -41,7 +128,7 @@ export function ApplicationPeriodDialog(): React.JSX.Element {
           Set Application Period and Budget
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
           <DialogTitle>Set Application Period and Budget</DialogTitle>
           <DialogDescription>
@@ -50,6 +137,32 @@ export function ApplicationPeriodDialog(): React.JSX.Element {
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="title" className="text-right">
+              Title
+            </Label>
+            <Input
+              id="title"
+              type="text"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="e.g., Academic Year 2024-2025"
+              className="col-span-3"
+            />
+          </div>
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="description" className="text-right">
+              Description
+            </Label>
+            <Input
+              id="description"
+              type="text"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder="Optional description"
+              className="col-span-3"
+            />
+          </div>
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="startDate" className="text-right">
               Start Date
@@ -97,8 +210,42 @@ export function ApplicationPeriodDialog(): React.JSX.Element {
               />
             </div>
           </div>
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label className="text-right">Accepting Applications</Label>
+            <div className="col-span-3 flex items-center gap-3">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setIsAccepting(!isAccepting)}
+                className="flex items-center gap-2"
+              >
+                {isAccepting ? (
+                  <ToggleRight className="w-5 h-5 text-green-600" />
+                ) : (
+                  <ToggleLeft className="w-5 h-5 text-gray-400" />
+                )}
+                <span
+                  className={isAccepting ? "text-green-600" : "text-gray-500"}
+                >
+                  {isAccepting ? "Open" : "Closed"}
+                </span>
+              </Button>
+              <p className="text-sm text-gray-500">
+                {isAccepting
+                  ? "Applications are being accepted"
+                  : "Applications are not being accepted"}
+              </p>
+            </div>
+          </div>
         </div>
         <DialogFooter>
+          <Button
+            variant="outline"
+            onClick={() => setIsOpen(false)}
+            disabled={isLoading}
+          >
+            Cancel
+          </Button>
           <Button type="submit" onClick={handleSave} disabled={isLoading}>
             {isLoading ? "Saving..." : "Save Period"}
           </Button>
