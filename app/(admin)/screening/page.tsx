@@ -30,8 +30,14 @@ import {
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
-import { ApplicationDetailsDialog } from "@/components/admin/application-details-dialog";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { ApplicationDetailsDialog } from "@/components/admin-screening/application-details-dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 
@@ -244,10 +250,13 @@ export default function ScreeningPage() {
                     {periods.map((period) => (
                       <SelectItem key={period.id} value={period.id}>
                         {period.title} (
-                        {new Date(period.startDate).toLocaleDateString("en-US", {
-                          month: "short",
-                          year: "numeric",
-                        })}{" "}
+                        {new Date(period.startDate).toLocaleDateString(
+                          "en-US",
+                          {
+                            month: "short",
+                            year: "numeric",
+                          }
+                        )}{" "}
                         -{" "}
                         {new Date(period.endDate).toLocaleDateString("en-US", {
                           month: "short",
@@ -259,7 +268,10 @@ export default function ScreeningPage() {
                   </SelectContent>
                 </Select>
                 {selectedPeriodId && selectedPeriodId !== latestPeriodId && (
-                  <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-200">
+                  <Badge
+                    variant="outline"
+                    className="bg-yellow-50 text-yellow-700 border-yellow-200"
+                  >
                     View Only - Past Period
                   </Badge>
                 )}

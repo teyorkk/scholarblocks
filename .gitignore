@@ -46,5 +46,6 @@ next-env.d.ts
 #test
 app/test*
 app/(user)/test-application
+app/api/applications/test-submit
 
 
