@@ -1340,8 +1340,10 @@ const References = () => {
                   {refButtons.map((b) => (
                     <a
                       key={b.l}
-                      href="/Iskolarblock-IMRAD.pdf"
-                      download
+                      href="https://fuecadlwggbsrwkvwqkd.supabase.co/storage/v1/object/public/documents/public/Iskolarblock-IMRaD.pdf"
+                      download="Iskolarblock-IMRaD.pdf"
+                      target="_blank"
+                      rel="noopener noreferrer"
                       style={{
                         display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
                         padding: "12px 20px", borderRadius: 10, fontWeight: 700, fontSize: 14,
